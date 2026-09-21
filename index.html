@@ -41,7 +41,7 @@ body{font-family:var(--ff-body);background:var(--bg);color:var(--t1);line-height
 
 /* Layout */
 .shell{max-width:760px;margin:0 auto;padding:2.5rem 1.25rem 4rem;transition:max-width .15s}
-.shell.wide{max-width:1500px}
+.shell.wide{max-width:1680px}
 header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--bd)}
 .logo{font-family:var(--ff-display);font-size:22px;font-weight:300;color:var(--t1);letter-spacing:-.02em;margin-bottom:4px}
 .logo span{color:var(--acc)}
@@ -144,24 +144,12 @@ details.example-details summary:hover{opacity:.8}
    names (.btn, .field, .modal, .overlay, etc. in the original
    standalone tracker) can never collide with the screener's own
    identically-named classes above. Its own CSS variables (--tk-*)
-   and its own dark-mode toggle are independent of the rest of the
-   page, which has no light mode of its own.
+   are namespaced accordingly. Always dark, matching the rest of
+   this page (which has no light mode of its own) — the standalone
+   tracker's independent light/dark toggle was dropped as unneeded
+   complexity once merged into an always-dark tool.
    ============================================================ */
 #tab-tracker{
-  --tk-bg:#f6f4ee;--tk-bg2:#edeae2;--tk-bg3:#e4e0d6;
-  --tk-ink:#1c1b18;--tk-ink2:#5a5850;--tk-ink3:#9a9890;
-  --tk-rule:rgba(28,27,24,0.10);--tk-rule2:rgba(28,27,24,0.16);
-  --tk-acc:#2e6b3e;--tk-acc-bg:#e8f2eb;--tk-acc-text:#1d4a29;
-  --tk-amber:#7a5c1e;--tk-amber-bg:#f5edda;--tk-amber-text:#5a3e0e;
-  --tk-blue:#1e4a7a;--tk-blue-bg:#e4ecf6;--tk-blue-text:#0e2e50;
-  --tk-red:#8a2020;--tk-red-bg:#f5e4e4;--tk-red-text:#621414;
-  --tk-gray-bg:#f0ede6;--tk-gray-text:#6a6860;
-  --tk-card-bg:#ffffff;--tk-th-bg:#fafaf8;--tk-hover-bg:#faf9f6;
-  --tk-offer-bg:#e8f5e4;--tk-offer-text:#1a4a12;
-  --tk-overlay-bg:rgba(28,27,24,0.45);
-  --tk-rmd:5px;--tk-rlg:8px;
-}
-#tab-tracker[data-tk-theme="dark"]{
   --tk-bg:#181815;--tk-bg2:#221f1c;--tk-bg3:#2b2824;
   --tk-ink:#eae7de;--tk-ink2:#b3afa4;--tk-ink3:#7d7a70;
   --tk-rule:rgba(255,255,255,0.08);--tk-rule2:rgba(255,255,255,0.14);
@@ -173,8 +161,9 @@ details.example-details summary:hover{opacity:.8}
   --tk-card-bg:#201e1a;--tk-th-bg:#1c1a17;--tk-hover-bg:#252320;
   --tk-offer-bg:rgba(95,179,119,0.2);--tk-offer-text:#a8e0b8;
   --tk-overlay-bg:rgba(0,0,0,0.6);
+  --tk-rmd:5px;--tk-rlg:8px;
 }
-#tab-tracker .tk-card{background:var(--tk-bg);border:0.5px solid var(--tk-rule2);border-radius:var(--rlg);padding:1.5rem;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:var(--tk-ink);transition:background .15s,color .15s}
+#tab-tracker .tk-card{background:var(--tk-bg);border:0.5px solid var(--tk-rule2);border-radius:var(--rlg);padding:1.25rem;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:var(--tk-ink);transition:background .15s,color .15s}
 #tab-tracker .tk-header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:1.5rem;padding-bottom:1.1rem;border-bottom:1px solid var(--tk-rule2);flex-wrap:wrap}
 #tab-tracker .tk-header-eyebrow{font-family:var(--ff-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tk-ink3);margin-bottom:5px}
 #tab-tracker .tk-header-title{font-size:20px;font-weight:500;color:var(--tk-ink);letter-spacing:-.02em}
@@ -214,8 +203,8 @@ details.example-details summary:hover{opacity:.8}
 #tab-tracker colgroup col.c-notes{width:18%}
 #tab-tracker colgroup col.c-action{width:6%}
 #tab-tracker thead tr{border-bottom:1px solid var(--tk-rule2)}
-#tab-tracker th{font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tk-ink3);font-weight:500;padding:10px 14px;text-align:left;white-space:nowrap;background:var(--tk-th-bg)}
-#tab-tracker td{padding:11px 14px;border-bottom:1px solid var(--tk-rule);vertical-align:top;font-size:13px;word-wrap:break-word;overflow-wrap:break-word;color:var(--tk-ink)}
+#tab-tracker th{font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tk-ink3);font-weight:500;padding:10px 11px;text-align:left;white-space:nowrap;background:var(--tk-th-bg)}
+#tab-tracker td{padding:11px 11px;border-bottom:1px solid var(--tk-rule);vertical-align:top;font-size:13px;word-wrap:break-word;overflow-wrap:break-word;color:var(--tk-ink)}
 #tab-tracker tr:last-child td{border-bottom:none}
 #tab-tracker tr:hover td{background:var(--tk-hover-bg)}
 #tab-tracker .tk-col-company{font-weight:500;color:var(--tk-ink)}
@@ -370,7 +359,6 @@ details.example-details summary:hover{opacity:.8}
       <button class="tk-btn" onclick="Tracker.exportCSV()">Export CSV</button>
       <button class="tk-btn" onclick="document.getElementById('tk-importFile').click()">Import CSV</button>
       <input type="file" id="tk-importFile" accept=".csv" style="display:none" onchange="Tracker.handleImportFile(event)">
-      <button class="tk-btn" id="tk-themeToggle" onclick="Tracker.toggleTheme()">☀️ Light mode</button>
     </div>
 
     <div class="tk-filter-row" id="tk-filterRow"></div>
@@ -1180,7 +1168,6 @@ window.addEventListener('DOMContentLoaded', initApp);
 // ---------------------------------------------------------------------------
 const Tracker = (function(){
   const STORE_KEY = 'jst_tracker_v1'; // see jst_* namespacing note near STORAGE_KEY_RESUME above
-  const THEME_KEY = 'jst_tracker_theme_v1';
   let apps = [];
   let editId = null;
   let activeFilter = 'all';
@@ -1213,30 +1200,6 @@ const Tracker = (function(){
     if (changed) save();
   }
   function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(apps)); } catch {} }
-
-  // ── Theme (scoped to #tab-tracker; independent of the rest of the page,
-  // which has no light mode of its own) ──────────────────────────────────
-  function applyTheme(theme) {
-    const root = document.getElementById('tab-tracker');
-    const btn = document.getElementById('tk-themeToggle');
-    if (theme === 'dark') { root.setAttribute('data-tk-theme','dark'); if (btn) btn.textContent = '☀️ Light mode'; }
-    else { root.removeAttribute('data-tk-theme'); if (btn) btn.textContent = '🌙 Dark mode'; }
-  }
-  function toggleTheme() {
-    const root = document.getElementById('tab-tracker');
-    const isDark = root.getAttribute('data-tk-theme') === 'dark';
-    const next = isDark ? 'light' : 'dark';
-    try { localStorage.setItem(THEME_KEY, next); } catch {}
-    applyTheme(next);
-  }
-  function initTheme() {
-    let saved = null;
-    try { saved = localStorage.getItem(THEME_KEY); } catch {}
-    // Default dark (rather than the standalone tracker's light default) so
-    // it matches the rest of this page, which is always dark. Still fully
-    // independent and user-togglable, same as the standalone tool.
-    applyTheme(saved || 'dark');
-  }
 
   // ── Filters ──────────────────────────────────────────────────────────
   function buildFilters() {
@@ -1482,7 +1445,6 @@ const Tracker = (function(){
   // ── Init ─────────────────────────────────────────────────────────────
   function refresh() { renderStats(); buildFilters(); renderTable(); }
   function init() {
-    initTheme();
     load();
     refresh();
   }
@@ -1490,7 +1452,7 @@ const Tracker = (function(){
   return {
     init, refresh,
     openModal, closeModal, handleOverlayClick, saveApplication, editApp, deleteApp,
-    exportCSV, handleImportFile, toggleTheme, renderTable,
+    exportCSV, handleImportFile, renderTable,
   };
 })();
 
