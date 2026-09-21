@@ -638,8 +638,13 @@ GENERAL GUIDANCE:
 // Storage — persists a user's resume/rule answers in this browser only
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY_RESUME = 'jds_resume_v1';
-const STORAGE_KEY_RULES = 'jds_rules_v2';
+// Namespaced jst_* (job-search-toolkit) — deliberately distinct from the
+// jds_*/jd_*/app_tracker_* keys used by the two separate live tools this
+// was merged from. Chrome does not reliably scope localStorage per exact
+// file:// path, so reusing those keys here would read/write the SAME
+// storage bucket as the live tools instead of an isolated copy.
+const STORAGE_KEY_RESUME = 'jst_resume_v1';
+const STORAGE_KEY_RULES = 'jst_rules_v1';
 
 function storageGet(key) {
   try { return localStorage.getItem(key) || ''; } catch (e) { return ''; }
@@ -995,7 +1000,7 @@ verdict: apply = score 7+, review = score 5-6, pass = score 4 or below`;
 // Lightweight record of past screens so repeat companies/roles surface
 // their prior score and outcome instead of being scored in isolation
 // each time. Deterministic lookup, not sent back through the model.
-const SCREEN_HISTORY_KEY = 'jd_screen_history_v1';
+const SCREEN_HISTORY_KEY = 'jst_screen_history_v1'; // see jst_* namespacing note above
 function loadScreenHistory() {
   try { return JSON.parse(localStorage.getItem(SCREEN_HISTORY_KEY)) || []; }
   catch { return []; }
@@ -1174,8 +1179,8 @@ window.addEventListener('DOMContentLoaded', initApp);
 // element lookups can't collide either.
 // ---------------------------------------------------------------------------
 const Tracker = (function(){
-  const STORE_KEY = 'app_tracker_v1';
-  const THEME_KEY = 'app_tracker_theme_v1';
+  const STORE_KEY = 'jst_tracker_v1'; // see jst_* namespacing note near STORAGE_KEY_RESUME above
+  const THEME_KEY = 'jst_tracker_theme_v1';
   let apps = [];
   let editId = null;
   let activeFilter = 'all';
