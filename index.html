@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Description Screener & Resume Tailor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e0c;
+  --bg2:#161614;
+  --bg3:#1e1e1b;
+  --bg4:#252522;
+  --t1:#f0ede6;
+  --t2:#a8a59e;
+  --t3:#6b6963;
+  --bd:rgba(255,255,255,0.07);
+  --bd2:rgba(255,255,255,0.12);
+  --acc:#d4a848;
+  --acc-bg:rgba(212,168,72,0.10);
+  --acc-text:#d4a848;
+  --green:#6aaa3c;
+  --green-bg:rgba(106,170,60,0.10);
+  --green-text:#6aaa3c;
+  --red:#e05c5c;
+  --red-bg:rgba(224,92,92,0.10);
+  --red-text:#e05c5c;
+  --amber:#d4a848;
+  --amber-bg:rgba(212,168,72,0.10);
+  --amber-text:#d4a848;
+  --rmd:6px;--rlg:10px;
+  --ff-display:'Fraunces',Georgia,serif;
+  --ff-mono:'DM Mono',monospace;
+  --ff-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+html{font-size:16px}
+body{font-family:var(--ff-body);background:var(--bg);color:var(--t1);line-height:1.6;min-height:100vh}
+
+/* Layout */
+.shell{max-width:760px;margin:0 auto;padding:2.5rem 1.25rem 4rem;transition:max-width .15s}
+.shell.wide{max-width:1500px}
+header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--bd)}
+.logo{font-family:var(--ff-display);font-size:22px;font-weight:300;color:var(--t1);letter-spacing:-.02em;margin-bottom:4px}
+.logo span{color:var(--acc)}
+.tagline{font-size:12px;color:var(--t3);font-family:var(--ff-mono)}
+
+/* API key section */
+.key-section{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rlg);padding:16px 18px;margin-bottom:1.5rem}
+.key-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.key-status{font-size:11px;font-family:var(--ff-mono);margin-top:6px}
+.key-status.ok{color:var(--green)}
+.key-status.no{color:var(--t3)}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;margin-bottom:1.5rem;background:var(--bg2);border-radius:var(--rmd);padding:3px;flex-wrap:wrap}
+.tab{font-size:12px;font-family:var(--ff-mono);padding:7px 16px;border-radius:4px;cursor:pointer;color:var(--t3);background:transparent;border:none;transition:all .15s}
+.tab:hover{color:var(--t1)}
+.tab.active{background:var(--bg4);color:var(--t1)}
+
+/* Form elements */
+label.sec{display:block;font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+textarea,input[type=text],input[type=password]{width:100%;background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd);color:var(--t1);font-family:var(--ff-body);font-size:13px;padding:10px 12px;outline:none;transition:border-color .15s}
+textarea:focus,input:focus{border-color:var(--bd2)}
+textarea{resize:vertical;line-height:1.6}
+textarea.mono{font-family:var(--ff-mono);font-size:12px}
+.field{margin-bottom:1.25rem}
+
+/* Buttons */
+.btn{font-size:13px;font-family:var(--ff-body);padding:9px 20px;border-radius:var(--rmd);cursor:pointer;border:0.5px solid var(--bd2);background:transparent;color:var(--t1);transition:all .15s}
+.btn:hover{background:var(--bg3)}
+.btn:active{transform:scale(0.98)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#0e0e0c;font-weight:500}
+.btn.primary:hover{opacity:.9}
+.btn.sm{font-size:12px;padding:6px 14px}
+.btn.danger{color:var(--red-text);border-color:rgba(224,92,92,0.25)}
+.btn.danger:hover{background:var(--red-bg)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* Results */
+.divider{border:none;border-top:0.5px solid var(--bd);margin:1.5rem 0}
+.score-row{display:flex;align-items:flex-start;gap:20px;margin-bottom:1.25rem;flex-wrap:wrap}
+.score-num{font-family:var(--ff-display);font-size:56px;font-weight:300;line-height:1}
+.score-meta{flex:1;min-width:140px}
+.score-label{font-size:12px;color:var(--t3);font-family:var(--ff-mono);margin-top:4px}
+.verdict{display:inline-block;font-size:11px;font-family:var(--ff-mono);padding:4px 12px;border-radius:99px;margin-bottom:8px}
+.v-apply{background:var(--green-bg);color:var(--green-text)}
+.v-review{background:var(--amber-bg);color:var(--amber-text)}
+.v-pass{background:var(--red-bg);color:var(--red-text)}
+.salary-pill{display:inline-block;font-size:12px;font-family:var(--ff-mono);background:var(--acc-bg);color:var(--acc-text);padding:5px 12px;border-radius:var(--rmd)}
+.summary-box{background:var(--bg2);border-left:2px solid var(--acc);border-radius:0 var(--rmd) var(--rmd) 0;padding:12px 16px;font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.25rem}
+@media(max-width:520px){.two-col{grid-template-columns:1fr}}
+.col-head{font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.col-head.fit{color:var(--green)}
+.col-head.gap{color:var(--red)}
+.reasons{list-style:none}
+.reasons li{font-size:12px;color:var(--t2);padding:5px 0;border-bottom:0.5px solid var(--bd);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.reasons li:last-child{border-bottom:none}
+.reasons li::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.fit li::before{background:var(--green)}
+.gap li::before{background:var(--red)}
+
+/* Step 2 */
+.step2-banner{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rlg);padding:14px 18px;margin-top:1.25rem}
+.step2-banner p{font-size:12px;color:var(--t3);margin-top:6px;line-height:1.5}
+
+/* Output blocks */
+.out-block{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rlg);padding:16px 18px;margin-bottom:1rem}
+.out-label{font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.out-text{font-family:var(--ff-mono);font-size:12px;color:var(--t2);white-space:pre-wrap;word-break:break-word;line-height:1.7}
+.flags-box{background:var(--amber-bg);border-radius:var(--rmd);padding:10px 14px;margin-bottom:1rem;border:0.5px solid rgba(212,168,72,0.2)}
+.flags-head{font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--amber-text);margin-bottom:6px}
+.flag-item{font-size:12px;color:var(--amber-text);padding:3px 0;border-bottom:0.5px solid rgba(212,168,72,0.15)}
+.flag-item:last-child{border-bottom:none}
+
+/* Loading */
+.loading{display:flex;align-items:center;gap:10px;padding:16px 0;font-size:13px;color:var(--t3)}
+.spin{width:16px;height:16px;border:1.5px solid var(--bd2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:var(--red-bg);border:0.5px solid rgba(224,92,92,0.2);border-radius:var(--rmd);padding:10px 14px;font-size:13px;color:var(--red-text)}
+
+/* Config panel */
+.config-note{font-size:11px;font-family:var(--ff-mono);color:var(--t3);line-height:1.5;margin-top:6px}
+.section-title{font-family:var(--ff-display);font-size:17px;font-weight:300;color:var(--t1);margin-bottom:4px}
+.section-sub{font-size:12px;color:var(--t3);margin-bottom:1rem}
+
+/* Guided rule questions */
+.group-head{font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin:22px 0 10px;padding-top:16px;border-top:0.5px solid var(--bd)}
+.group-head:first-child{margin-top:0;padding-top:0;border-top:none}
+
+/* Example disclosures */
+details.example-details{margin-top:8px}
+details.example-details summary{font-size:12px;font-family:var(--ff-mono);color:var(--acc);cursor:pointer;list-style:none}
+details.example-details summary::-webkit-details-marker{display:none}
+details.example-details summary:hover{opacity:.8}
+.example-box{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd);padding:12px 14px;margin-top:8px;font-size:12px;color:var(--t2);white-space:pre-wrap;line-height:1.6;max-height:340px;overflow-y:auto}
+.example-box.mono{font-family:var(--ff-mono);font-size:11.5px}
+
+/* ============================================================
+   Tracker tab — scoped entirely under #tab-tracker so its class
+   names (.btn, .field, .modal, .overlay, etc. in the original
+   standalone tracker) can never collide with the screener's own
+   identically-named classes above. Its own CSS variables (--tk-*)
+   and its own dark-mode toggle are independent of the rest of the
+   page, which has no light mode of its own.
+   ============================================================ */
+#tab-tracker{
+  --tk-bg:#f6f4ee;--tk-bg2:#edeae2;--tk-bg3:#e4e0d6;
+  --tk-ink:#1c1b18;--tk-ink2:#5a5850;--tk-ink3:#9a9890;
+  --tk-rule:rgba(28,27,24,0.10);--tk-rule2:rgba(28,27,24,0.16);
+  --tk-acc:#2e6b3e;--tk-acc-bg:#e8f2eb;--tk-acc-text:#1d4a29;
+  --tk-amber:#7a5c1e;--tk-amber-bg:#f5edda;--tk-amber-text:#5a3e0e;
+  --tk-blue:#1e4a7a;--tk-blue-bg:#e4ecf6;--tk-blue-text:#0e2e50;
+  --tk-red:#8a2020;--tk-red-bg:#f5e4e4;--tk-red-text:#621414;
+  --tk-gray-bg:#f0ede6;--tk-gray-text:#6a6860;
+  --tk-card-bg:#ffffff;--tk-th-bg:#fafaf8;--tk-hover-bg:#faf9f6;
+  --tk-offer-bg:#e8f5e4;--tk-offer-text:#1a4a12;
+  --tk-overlay-bg:rgba(28,27,24,0.45);
+  --tk-rmd:5px;--tk-rlg:8px;
+}
+#tab-tracker[data-tk-theme="dark"]{
+  --tk-bg:#181815;--tk-bg2:#221f1c;--tk-bg3:#2b2824;
+  --tk-ink:#eae7de;--tk-ink2:#b3afa4;--tk-ink3:#7d7a70;
+  --tk-rule:rgba(255,255,255,0.08);--tk-rule2:rgba(255,255,255,0.14);
+  --tk-acc:#5fb377;--tk-acc-bg:rgba(95,179,119,0.16);--tk-acc-text:#8fd6a3;
+  --tk-amber:#d9a94a;--tk-amber-bg:rgba(217,169,74,0.16);--tk-amber-text:#e8c47a;
+  --tk-blue:#6fa3d8;--tk-blue-bg:rgba(111,163,216,0.16);--tk-blue-text:#9cc4ea;
+  --tk-red:#e2726b;--tk-red-bg:rgba(226,114,107,0.16);--tk-red-text:#f0a29c;
+  --tk-gray-bg:rgba(255,255,255,0.06);--tk-gray-text:#9a978d;
+  --tk-card-bg:#201e1a;--tk-th-bg:#1c1a17;--tk-hover-bg:#252320;
+  --tk-offer-bg:rgba(95,179,119,0.2);--tk-offer-text:#a8e0b8;
+  --tk-overlay-bg:rgba(0,0,0,0.6);
+}
+#tab-tracker .tk-card{background:var(--tk-bg);border:0.5px solid var(--tk-rule2);border-radius:var(--rlg);padding:1.5rem;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:var(--tk-ink);transition:background .15s,color .15s}
+#tab-tracker .tk-header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:1.5rem;padding-bottom:1.1rem;border-bottom:1px solid var(--tk-rule2);flex-wrap:wrap}
+#tab-tracker .tk-header-eyebrow{font-family:var(--ff-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tk-ink3);margin-bottom:5px}
+#tab-tracker .tk-header-title{font-size:20px;font-weight:500;color:var(--tk-ink);letter-spacing:-.02em}
+#tab-tracker .tk-header-stats{display:flex;gap:16px;flex-wrap:wrap}
+#tab-tracker .tk-stat{text-align:center}
+#tab-tracker .tk-stat-num{font-family:var(--ff-mono);font-size:19px;font-weight:500;color:var(--tk-ink);line-height:1}
+#tab-tracker .tk-stat-label{font-size:11px;color:var(--tk-ink3);margin-top:2px}
+#tab-tracker .tk-toolbar{display:flex;gap:8px;margin-bottom:1.1rem;flex-wrap:wrap;align-items:center}
+#tab-tracker .tk-btn{font-size:12px;font-family:'DM Sans',sans-serif;padding:7px 16px;border-radius:var(--tk-rmd);border:1px solid var(--tk-rule2);background:transparent;color:var(--tk-ink);cursor:pointer;transition:all .15s;white-space:nowrap}
+#tab-tracker .tk-btn:hover{background:var(--tk-bg3)}
+#tab-tracker .tk-btn.tk-primary{background:var(--tk-ink);color:var(--tk-bg);border-color:var(--tk-ink);font-weight:500}
+#tab-tracker .tk-btn.tk-primary:hover{opacity:.85}
+#tab-tracker .tk-search-input{font-size:12px;font-family:'DM Sans',sans-serif;padding:7px 12px;border-radius:var(--tk-rmd);border:1px solid var(--tk-rule2);background:var(--tk-bg2);color:var(--tk-ink);outline:none;flex:1;min-width:160px;max-width:260px}
+#tab-tracker .tk-search-input:focus{border-color:var(--tk-ink3)}
+#tab-tracker .tk-search-input::placeholder{color:var(--tk-ink3)}
+#tab-tracker .tk-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.1rem}
+#tab-tracker .tk-filter-btn{font-size:11px;font-family:var(--ff-mono);padding:4px 12px;border-radius:99px;border:1px solid var(--tk-rule);background:transparent;color:var(--tk-ink3);cursor:pointer;transition:all .15s}
+#tab-tracker .tk-filter-btn:hover{border-color:var(--tk-ink3);color:var(--tk-ink)}
+#tab-tracker .tk-filter-btn.tk-active{background:var(--tk-ink);border-color:var(--tk-ink);color:var(--tk-bg)}
+#tab-tracker .tk-badge{display:inline-block;font-size:10px;font-family:var(--ff-mono);padding:2px 9px;border-radius:99px;white-space:normal;line-height:1.4;max-width:100%}
+#tab-tracker .tk-badge-applied{background:var(--tk-blue-bg);color:var(--tk-blue-text)}
+#tab-tracker .tk-badge-screen{background:var(--tk-amber-bg);color:var(--tk-amber-text)}
+#tab-tracker .tk-badge-interview{background:var(--tk-acc-bg);color:var(--tk-acc-text)}
+#tab-tracker .tk-badge-offer{background:var(--tk-offer-bg);color:var(--tk-offer-text);font-weight:500}
+#tab-tracker .tk-badge-rejected{background:var(--tk-red-bg);color:var(--tk-red-text)}
+#tab-tracker .tk-badge-withdrawn{background:var(--tk-gray-bg);color:var(--tk-gray-text)}
+#tab-tracker .tk-badge-pending{background:var(--tk-bg3);color:var(--tk-ink3)}
+#tab-tracker .tk-table-wrap{overflow-x:auto;border:1px solid var(--tk-rule2);border-radius:var(--tk-rlg);background:var(--tk-card-bg)}
+#tab-tracker table{width:100%;border-collapse:collapse;table-layout:fixed}
+#tab-tracker colgroup col.c-company{width:9%}
+#tab-tracker colgroup col.c-role{width:14%}
+#tab-tracker colgroup col.c-date{width:7%}
+#tab-tracker colgroup col.c-status{width:16%}
+#tab-tracker colgroup col.c-posted{width:8%}
+#tab-tracker colgroup col.c-stated{width:9%}
+#tab-tracker colgroup col.c-next{width:13%}
+#tab-tracker colgroup col.c-notes{width:18%}
+#tab-tracker colgroup col.c-action{width:6%}
+#tab-tracker thead tr{border-bottom:1px solid var(--tk-rule2)}
+#tab-tracker th{font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tk-ink3);font-weight:500;padding:10px 14px;text-align:left;white-space:nowrap;background:var(--tk-th-bg)}
+#tab-tracker td{padding:11px 14px;border-bottom:1px solid var(--tk-rule);vertical-align:top;font-size:13px;word-wrap:break-word;overflow-wrap:break-word;color:var(--tk-ink)}
+#tab-tracker tr:last-child td{border-bottom:none}
+#tab-tracker tr:hover td{background:var(--tk-hover-bg)}
+#tab-tracker .tk-col-company{font-weight:500;color:var(--tk-ink)}
+#tab-tracker .tk-col-role{color:var(--tk-ink2)}
+#tab-tracker .tk-col-date{font-family:var(--ff-mono);font-size:11px;color:var(--tk-ink3)}
+#tab-tracker .tk-col-salary{font-family:var(--ff-mono);font-size:11px;color:var(--tk-ink2)}
+#tab-tracker .tk-col-notes{color:var(--tk-ink3);font-size:12px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+#tab-tracker .tk-col-notes.tk-expanded{display:block;-webkit-line-clamp:unset;overflow:visible}
+#tab-tracker .tk-col-action{white-space:nowrap}
+#tab-tracker .tk-action-btn{font-size:11px;padding:3px 9px;margin-right:4px;border-radius:3px;border:1px solid var(--tk-rule);background:transparent;color:var(--tk-ink3);cursor:pointer;transition:all .15s}
+#tab-tracker .tk-action-btn:hover{border-color:var(--tk-ink3);color:var(--tk-ink)}
+#tab-tracker .tk-action-btn.tk-del:hover{border-color:var(--tk-red);color:var(--tk-red)}
+#tab-tracker .tk-empty{text-align:center;padding:3rem 1rem;color:var(--tk-ink3)}
+#tab-tracker .tk-empty-icon{font-size:32px;margin-bottom:12px;opacity:.4}
+#tab-tracker .tk-empty-title{font-size:15px;font-weight:500;color:var(--tk-ink2);margin-bottom:6px}
+#tab-tracker .tk-empty-sub{font-size:13px}
+#tab-tracker .tk-overlay{display:none;position:fixed;inset:0;background:var(--tk-overlay-bg);z-index:100;align-items:center;justify-content:center;padding:1rem}
+#tab-tracker .tk-overlay.tk-open{display:flex}
+#tab-tracker .tk-modal{background:var(--tk-bg);border-radius:10px;padding:28px 28px 24px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);font-family:'DM Sans',sans-serif;color:var(--tk-ink)}
+#tab-tracker .tk-modal-title{font-size:16px;font-weight:500;color:var(--tk-ink);margin-bottom:20px;letter-spacing:-.01em}
+#tab-tracker .tk-field{margin-bottom:14px}
+#tab-tracker .tk-field label{display:block;font-size:11px;font-family:var(--ff-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--tk-ink3);margin-bottom:5px}
+#tab-tracker .tk-field input,#tab-tracker .tk-field select,#tab-tracker .tk-field textarea{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px 11px;border:1px solid var(--tk-rule2);border-radius:var(--tk-rmd);background:var(--tk-card-bg);color:var(--tk-ink);outline:none;transition:border-color .15s}
+#tab-tracker .tk-field input:focus,#tab-tracker .tk-field select:focus,#tab-tracker .tk-field textarea:focus{border-color:var(--tk-ink3)}
+#tab-tracker .tk-field textarea{resize:vertical;min-height:72px;line-height:1.5}
+#tab-tracker .tk-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#tab-tracker .tk-modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--tk-rule)}
+#tab-tracker .tk-next-action{font-size:11px;color:var(--tk-amber-text);background:var(--tk-amber-bg);padding:2px 7px;border-radius:3px;display:inline-block;margin-top:3px}
+@media(max-width:600px){
+  #tab-tracker .tk-field-row{grid-template-columns:1fr}
+  #tab-tracker .tk-header-stats{gap:10px}
+  #tab-tracker .tk-stat-num{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header>
+  <div class="logo">Job Description <span>Screener</span></div>
+  <div class="tagline">job description screener + resume tailor + application tracker · powered by claude api</div>
+</header>
+
+<!-- WELCOME / SETUP -->
+<div id="welcomeScreen" style="display:none">
+  <div class="section-title">Welcome — let's set up your profile</div>
+  <div class="section-sub">This tool screens job postings against your resume and drafts tailored applications. Everything below is saved only in this browser — nothing is sent anywhere except directly to Anthropic's API when you run a screening.</div>
+
+  <div class="field">
+    <label class="sec">Your resume</label>
+    <div class="section-sub" style="margin-bottom:0">Paste your current resume as plain text.
+      <details class="example-details">
+        <summary>See an example resume ↗</summary>
+        <div id="exampleResumeBox" class="example-box mono"></div>
+      </details>
+    </div>
+    <textarea id="welcomeResume" class="mono" rows="14" placeholder="Paste your resume here…" style="margin-top:10px"></textarea>
+  </div>
+
+  <div class="section-title" style="font-size:15px;margin-top:1.75rem">Scoring rules <span style="font-family:var(--ff-body);font-weight:400;font-size:12px;color:var(--t3)">— optional, but recommended</span></div>
+  <div class="section-sub">A few questions to help the model score roles accurately for you specifically. Skip anything that doesn't apply.
+    <details class="example-details">
+      <summary>See how Chris answered these ↗</summary>
+      <div id="exampleAnswers" class="example-box"></div>
+    </details>
+  </div>
+  <div id="welcomeRulesContainer"></div>
+
+  <div class="btn-row" style="margin-top:1.25rem">
+    <button class="btn primary" onclick="finishSetup()">Save & start screening →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none">
+
+<!-- API Key -->
+<div class="key-section">
+  <label class="sec">Anthropic API key</label>
+  <div class="key-row">
+    <input type="password" id="apiKey" placeholder="sk-ant-..." style="flex:1;min-width:200px" oninput="checkKey()">
+    <button class="btn sm" onclick="toggleKeyVis()" id="keyToggle">show</button>
+  </div>
+  <div class="key-status no" id="keyStatus">No key entered — required to use this tool</div>
+  <div class="config-note" style="margin-top:6px">Your key is used only in your browser to call the Anthropic API directly. It is never stored, and you'll re-enter it each visit. Get a key at console.anthropic.com.</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('screen')">Screen a role</button>
+  <button class="tab" onclick="showTab('config')">Resume & rules</button>
+  <button class="tab" onclick="showTab('tracker')">Tracker</button>
+  <button class="tab" onclick="showTab('about')">About</button>
+</div>
+
+<!-- SCREEN TAB -->
+<div id="tab-screen">
+  <div class="field">
+    <label class="sec">Job description</label>
+    <textarea id="jdInput" rows="12" placeholder="Paste the full job description here — include title, responsibilities, requirements, and salary range if listed…"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" onclick="runScreen()">Screen this role →</button>
+    <button class="btn" onclick="clearScreen()">Clear</button>
+  </div>
+  <div id="screenOutput"></div>
+</div>
+
+<!-- CONFIG TAB -->
+<div id="tab-config" style="display:none">
+  <div class="section-title">Your resume</div>
+  <div class="section-sub">Paste your current resume as plain text. Used for all screenings and tailored drafts.
+    <details class="example-details">
+      <summary>See an example resume ↗</summary>
+      <div id="exampleResumeBox2" class="example-box mono"></div>
+    </details>
+  </div>
+  <div class="field">
+    <textarea id="resumeText" class="mono" rows="20" placeholder="Paste your resume here…" style="margin-top:10px"></textarea>
+  </div>
+  <div class="section-title">Scoring rules</div>
+  <div class="section-sub">A few questions to help the model score roles accurately for you specifically. These are the only rules applied — there's no hidden default beyond general scoring judgment.
+    <details class="example-details">
+      <summary>See how Chris answered these ↗</summary>
+      <div id="exampleAnswers2" class="example-box"></div>
+    </details>
+  </div>
+  <div id="configRulesContainer"></div>
+  <div class="btn-row">
+    <button class="btn primary" onclick="saveConfig()">Save configuration</button>
+    <button class="btn" onclick="loadExample()">Load Chris's example answers</button>
+    <button class="btn danger" onclick="startOver()">Start over</button>
+  </div>
+  <div id="saveMsg" style="font-size:12px;color:var(--green);margin-top:8px;font-family:var(--ff-mono);display:none">Saved to session.</div>
+  <div class="config-note" style="margin-top:10px" id="storageNote">Saved to this browser (localStorage) — it'll be here next time you visit this page, on this device and browser only. "Start over" clears it and returns you to setup.</div>
+</div>
+
+<!-- TRACKER TAB -->
+<div id="tab-tracker" style="display:none">
+  <div class="tk-card">
+    <div class="tk-header">
+      <div>
+        <div class="tk-header-eyebrow">Job search</div>
+        <div class="tk-header-title">Application Tracker</div>
+      </div>
+      <div class="tk-header-stats" id="tk-stats"></div>
+    </div>
+
+    <div class="tk-toolbar">
+      <button class="tk-btn tk-primary" onclick="Tracker.openModal()">+ Add application</button>
+      <input class="tk-search-input" type="text" placeholder="Search company or role…" id="tk-searchInput" oninput="Tracker.renderTable()">
+      <button class="tk-btn" onclick="Tracker.exportCSV()">Export CSV</button>
+      <button class="tk-btn" onclick="document.getElementById('tk-importFile').click()">Import CSV</button>
+      <input type="file" id="tk-importFile" accept=".csv" style="display:none" onchange="Tracker.handleImportFile(event)">
+      <button class="tk-btn" id="tk-themeToggle" onclick="Tracker.toggleTheme()">☀️ Light mode</button>
+    </div>
+
+    <div class="tk-filter-row" id="tk-filterRow"></div>
+
+    <div class="tk-table-wrap">
+      <table>
+        <colgroup>
+          <col class="c-company"><col class="c-role"><col class="c-date"><col class="c-status">
+          <col class="c-posted"><col class="c-stated"><col class="c-next"><col class="c-notes"><col class="c-action">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Applied</th>
+            <th>Status</th>
+            <th>Posted range</th>
+            <th>Stated salary</th>
+            <th>Next action</th>
+            <th>Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tk-tableBody"></tbody>
+      </table>
+    </div>
+    <div id="tk-emptyState" style="display:none">
+      <div class="tk-empty">
+        <div class="tk-empty-icon">📋</div>
+        <div class="tk-empty-title">No applications yet</div>
+        <div class="tk-empty-sub">Add your first application, or import a CSV export, to get started.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKER MODAL (nested inside #tab-tracker so the scoped CSS above,
+       e.g. #tab-tracker .tk-overlay{display:none}, actually applies to it) -->
+  <div class="tk-overlay" id="tk-overlay" onclick="Tracker.handleOverlayClick(event)">
+  <div class="tk-modal" id="tk-modal">
+    <div class="tk-modal-title" id="tk-modalTitle">Add application</div>
+    <div class="tk-field">
+      <label>Company</label>
+      <input type="text" id="tk-f-company" placeholder="e.g. Alcon">
+    </div>
+    <div class="tk-field">
+      <label>Role title</label>
+      <input type="text" id="tk-f-role" placeholder="e.g. Sr. Manager, Global Business Strategy">
+    </div>
+    <div class="tk-field-row">
+      <div class="tk-field">
+        <label>Date applied</label>
+        <input type="date" id="tk-f-date">
+      </div>
+      <div class="tk-field">
+        <label>Status</label>
+        <select id="tk-f-status">
+          <option value="applied">Applied</option>
+          <option value="screen">Recruiter screen</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected_app">Rejected — after application</option>
+          <option value="rejected_screen">Rejected — after recruiter screen</option>
+          <option value="rejected_hm">Rejected — after HM interview</option>
+          <option value="rejected_late">Rejected — after HM (later round)</option>
+          <option value="rejected_unspecified">Rejected — stage unspecified</option>
+          <option value="withdrawn">Withdrawn</option>
+          <option value="pending">Pending / No response</option>
+        </select>
+      </div>
+    </div>
+    <div class="tk-field-row">
+      <div class="tk-field">
+        <label>Posted salary range</label>
+        <input type="text" id="tk-f-posted-salary" placeholder="e.g. $120K–$155K or Not listed">
+      </div>
+      <div class="tk-field">
+        <label>Salary I stated</label>
+        <input type="text" id="tk-f-stated-salary" placeholder="e.g. $145,000">
+      </div>
+    </div>
+    <div class="tk-field">
+      <label>Next action</label>
+      <input type="text" id="tk-f-next" placeholder="e.g. Follow up June 25, prep for HM interview">
+    </div>
+    <div class="tk-field">
+      <label>Notes</label>
+      <textarea id="tk-f-notes" placeholder="Recruiter name, interview notes, contacts, anything useful…"></textarea>
+    </div>
+    <div class="tk-modal-footer">
+      <button class="tk-btn" onclick="Tracker.closeModal()">Cancel</button>
+      <button class="tk-btn tk-primary" onclick="Tracker.saveApplication()">Save</button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ABOUT TAB -->
+<div id="tab-about" style="display:none">
+  <div class="section-title">What this does</div>
+  <div class="section-sub" style="margin-bottom:1.25rem">A job application toolkit built on the Claude API: a JD screener, resume tailor, and application tracker in one place.</div>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Step 1 — Screen:</strong> Paste a job description and get an instant match score (1-10), verdict (apply / review before applying / pass), salary recommendation, fit reasons, identified gaps, and a plain-language summary. Scoring combines general judgment with whatever guidance you've given in the Resume & rules tab.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Step 2 — Tailor (optional, score 5+):</strong> Generates a tailored resume and cover note based on your stored resume, the job description, and your custom rules. Also flags any claims worth pressure-testing for accuracy before submitting.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Tracker:</strong> Log every application — status, salary, next action, notes — with CSV export/import, a dark mode independent of the rest of the page, and an "Active" filter that correctly excludes rejected/withdrawn/pending entries.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem"><strong style="color:var(--t1);font-weight:500">Using this tool:</strong> Enter your Anthropic API key (get one at console.anthropic.com), then paste any job description and screen it. Each screening costs roughly $0.005-0.01. Resume + cover note generation adds another $0.01-0.02.</p>
+  <div class="section-title">Setup & your data</div>
+  <div class="section-sub" style="margin-bottom:1rem">Built for anyone to pick up and use with their own background.</div>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem">The first time you open this page, you'll paste in your resume and answer a short set of optional questions about how you'd like roles scored. Both fields start blank — you can peek at Chris Cannon's actual resume and his answers to those same questions via the "See an example" links, without them ever landing in your own fields. Your answers are saved in this browser's local storage, so they're there the next time you open the page on this device. Nothing is uploaded to a server; the only network call this page makes is directly from your browser to Anthropic's API, using your own key. Use "Start over" in the Resume & rules tab to clear your saved data and go through setup again — useful if you're screening for a different person or want to start fresh.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7">Originally built by Chris Cannon for his own job search · <a href="https://chrisacannon.github.io" style="color:var(--acc);text-decoration:none" target="_blank">chrisacannon.github.io</a></p>
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+// ---------------------------------------------------------------------------
+// EXAMPLE DATA — shown as a pre-filled starting point during first-time setup
+// only. It is never applied automatically at screening time; a user's own
+// saved resume/rules (see STORAGE below) are what actually get used.
+// ---------------------------------------------------------------------------
+
+const EXAMPLE_RESUME = `CHRIS CANNON
+github.com/chrisacannon
+
+PROFESSIONAL SUMMARY
+Portfolio strategy and analytics leader with a track record as primary analytical owner of P&L performance inputs, lifecycle planning, and pricing decisions across complex global hardware portfolios. Experienced translating telemetry data, regional market inputs, and financial analyses into NPI recommendations and demand assumptions that drive executive decisions. Known for cross-functional influence, structured analysis, and the ability to manage high-stakes complexity across multiple business models and regions simultaneously.
+
+EXPERIENCE
+
+HP INC. — Sr. Portfolio Strategy & Analytics Manager, Ink Supplies | 2017–2021
+Managed global ink supplies portfolio strategy and analytics across the full product lifecycle, from NPI through end-of-life.
+- Served as primary source of assumptions for a ~$1.9B global ink supplies portfolio across multiple generations, five regions, and four business models; maintained ~55 platform x region x business model combinations derived from internal printer telemetry and regional business inputs
+- Led full product lifecycle management for a major new platform generation, from NPI planning through regional launch and ongoing performance tracking, coordinating across printer product, operations, supply chain, finance, legal, and regional teams globally
+- Partnered closely with finance to develop and validate financial analyses comparing NPI launch to do-nothing scenarios across all platform/region combinations; presented project plans, category reviews, and strategic recommendations directly to executive leadership
+- Designed and executed a supplies reconfiguration strategy for the Asia Pacific emerging market — introducing a fighter SKU to address an aftermarket share crisis — generating $40M+ in incremental revenue
+- Led pricing and revenue strategy across developed and emerging market business models, including the strategic transition from transactional to subscription in developed markets and profit-upfront models in emerging markets
+- Partnered with internal Big Data team to define telemetry data requirements, improving aftermarket share, usage, and cartridge mix visibility across the installed base
+
+DAZU ROCK CAPITAL LLC — Principal | 2021–Present
+Independent analytical work supporting investment evaluation and strategic planning for a private investment vehicle.
+- Applied structured market, competitive, and financial analysis to evaluate opportunities and support long-range planning decisions
+- Built reporting frameworks and dashboards to monitor category and consumer behavior trends
+
+ALCON LABORATORIES — Marketing Consultant | 2016
+- Conducted qualitative and quantitative research to inform product positioning and demand expectations; supported go-to-market planning with KPI-aligned insights across regulatory, pricing, and product development teams
+
+EDUCATION
+Texas Christian University, Neeley School of Business — Fort Worth, TX | MBA, 2017
+The University of Texas at Austin — Austin, TX | BS, Radio-TV-Film, 2009
+
+SKILLS
+Portfolio & Lifecycle Strategy: NPI planning, product lifecycle management, demand forecasting, scenario modeling, pricing strategy, P&L performance analysis
+Analytics & BI: Excel (advanced), Power BI, Qlik, Tableau, SQL (basic-to-intermediate querying), KPI tracking, dashboard development
+Tools: SAP, Microsoft Office Suite, Power BI, Qlik, Tableau, Claude (including Claude API-powered analytical tools)`;
+
+// ---------------------------------------------------------------------------
+// RULE_QUESTIONS — the "scoring rules" freeform box, broken into a
+// generalized set of questions. Each captures one piece of guidance that
+// actually changes how the model scores/tailors, without assuming anything
+// about the candidate's field. Any user answers these for their own
+// background; EXAMPLE_RULE_ANSWERS below shows how Chris answered them.
+// ---------------------------------------------------------------------------
+
+const RULE_QUESTIONS = [
+  { id: 'targetRoles', group: 'Target roles & calibration', header: 'TARGET ROLES',
+    label: 'What roles or functions are you targeting?',
+    helper: 'List them from strongest fit to more of a stretch.',
+    placeholder: 'e.g. Data Analyst — strong fit\nProduct Manager — stretch, aspirational', rows: 3 },
+  { id: 'calibration', group: 'Target roles & calibration', header: 'INTERVIEW CALIBRATION',
+    label: "Any roles or companies where you've gotten deep into the interview process before?",
+    helper: 'Optional — a useful signal for what "strong fit" looks like for you specifically.',
+    placeholder: 'e.g. Final round at Acme Corp for a Senior Analyst role', rows: 2 },
+  { id: 'disqualifiers', group: 'Disqualifiers & ambiguous titles', header: 'HARD DISQUALIFIERS',
+    label: 'What would automatically rule a role out for you?',
+    helper: "Requirements you don't have and can't reasonably claim — a specific license, technical domain, industry, language, or similar.",
+    placeholder: 'e.g. Requires an active CPA license\nRequires 5+ years in embedded systems engineering', rows: 3 },
+  { id: 'ambiguousTitles', group: 'Disqualifiers & ambiguous titles', header: 'AMBIGUOUS TITLES',
+    label: 'Any job titles in your field that can mean very different things at different companies?',
+    helper: "Tell the model how to tell the versions apart so it doesn't score you on title alone.",
+    placeholder: 'e.g. "Growth Marketer" sometimes means paid acquisition, sometimes brand — I\'m only a fit for the former', rows: 3 },
+  { id: 'notGaps', group: 'Skills accuracy', header: 'NOT ACTUALLY GAPS',
+    label: 'Any skills or tools you actually have, that a screener might mistakenly flag as a gap?',
+    helper: '',
+    placeholder: "e.g. I do have SQL experience, even though it isn't in my resume title", rows: 2 },
+  { id: 'realGaps', group: 'Skills accuracy', header: 'REAL GAPS',
+    label: 'Any skills or tools that are genuine gaps for you, worth flagging if a role requires them?',
+    helper: '',
+    placeholder: 'e.g. No experience with Salesforce', rows: 2 },
+  { id: 'scopeNuance', group: 'Skills accuracy', header: 'SCOPE & SENIORITY NUANCE',
+    label: 'Anything about your seniority or scope that needs careful framing?',
+    helper: 'e.g. no formal direct reports, informal vs. formal ownership of something.',
+    placeholder: "e.g. I've never had direct reports — don't flag people management unless explicitly required", rows: 2 },
+  { id: 'compRange', group: 'Compensation & tailoring', header: 'TARGET COMPENSATION',
+    label: "What's your target salary/comp range?",
+    helper: 'Used to suggest what to state if a posting asks, or lists none.',
+    placeholder: 'e.g. $110,000–$130,000 base', rows: 1 },
+  { id: 'languageRules', group: 'Compensation & tailoring', header: 'LANGUAGE RULES FOR TAILORING',
+    label: 'Anything that needs specific or cautious wording in a tailored resume/cover note?',
+    helper: 'e.g. exact title wording to preserve, avoiding a specific number, how to describe AI-assisted work.',
+    placeholder: 'e.g. Never state a specific years-of-experience number — say "extensive experience" instead', rows: 3 },
+  { id: 'anythingElse', group: 'Anything else', header: 'ADDITIONAL NOTES',
+    label: 'Anything else the scoring model should know about your fit?',
+    helper: '',
+    placeholder: 'Anything not covered above.', rows: 2 },
+];
+
+const EXAMPLE_RULE_ANSWERS = {
+  targetRoles: `Market & competitive intelligence — strongest fit
+Demand planning / product operations — strong fit
+Product portfolio / strategy — strong fit
+Pricing strategy & analytics — good fit
+CPG commercialization / consumer insights / go-to-market — aspirational, marketing-adjacent framing`,
+  calibration: `Final rounds at: 1Finity (demand planning), AFL Global (competitive intelligence), 7-Eleven (pricing analytics), Mary Kay (FP&A/NPD), Lennox (product manager).`,
+  disqualifiers: `Procurement/sourcing roles — supplier negotiations, RFPs, contract lifecycle, vendor SLAs, TCO/spend optimization as the primary function.
+Engineering domain roles — electrical, power systems, semiconductor, chemical, mechanical, aerospace, defense technical expertise as a must-have.
+Explicit people-management/coaching responsibility as a CORE, non-incidental job function — e.g. "manages/leads a team," "mentors and develops direct reports," "coaching conversations to develop team members," "manages performance" as a named responsibility (not just "collaborates with" or "influences without authority"). I have never had direct reports. Score this the same way as the other hard disqualifiers above — this should weigh heavily downward, not just get mentioned as a minor gap. The distinction: a single passing mention of "leadership" or "mentorship" as one of many soft competencies is NOT this — it's specifically when the JD describes managing/coaching/developing people as a defined, recurring duty of the role.`,
+  ambiguousTitles: `Titles like "Life Cycle Planner," "Demand Planner," "Supply Planner," or "Production Planner" can mean strategic product lifecycle management (my background) OR supply-chain operations execution (a different function). If the requirements mention S&OP process management, ERP tools like SAP APO/IBP/PP-DS, inventory turns, or production scheduling as core functions, treat it as the operations version — that's a gap for me.`,
+  notGaps: `Power BI, Qlik, Tableau, and SQL are things I actually have — don't flag these as gaps.`,
+  realGaps: `Syndicated retail data tools (NIQ, Circana, Numerator, Luminate, Nielsen, IRI) — real gap if required.
+Salesforce — only limited exposure.
+No CPG industry background.`,
+  scopeNuance: `FP&A operations work like month-end close, Hyperion, or Anaplan variance reporting isn't a strength.`,
+  compRange: `(not specified in this example — add your own target range here)`,
+  languageRules: `Never state a specific years-of-experience number ("8+ years," etc.) — use "extensive experience" instead.
+Keep my job title exactly as written: "Sr. Portfolio Strategy & Analytics Manager, Ink Supplies."
+Refer to "Claude (including Claude API-powered analytical tools)" as my primary AI tool. I do have real working experience with Copilot from earlier portfolio projects — it's fine to list it as secondary/working familiarity if genuinely relevant to a JD, but never present it as equal in depth to Claude, and never substitute it for Claude as primary.
+Never say I "owned P&L" or had P&L ownership — say "served as primary analytical owner of P&L performance inputs" instead.
+Never claim DCF, IRR, or NPV experience.
+
+SQL — HARD RULE, applies everywhere the word "SQL" appears, including in the Skills section as a bare tag: it must ALWAYS read exactly "SQL (basic-to-intermediate querying)" — never list "SQL" alone, even as a short skill-list entry. This applies even when the job description itself asks for strong/advanced SQL — do NOT stretch my framing to match the JD's language. If the JD wants SQL depth I don't have, that's an honest gap to flag, not a reason to drop the qualifier.
+
+FINANCIAL MODELING — HARD RULE, applies even when the job description explicitly asks for financial modeling skills — do NOT let the JD's language pull my framing toward a stronger claim than what's true:
+- For LARGE cross-platform/region scenario work at HP (the ~55 platform x region x business model combinations, NPI vs. do-nothing analyses): the ONLY acceptable phrasing is "developed and validated financial analyses in close partnership with Finance" (or a close paraphrase using "partnership," "partnered," or "in collaboration with Finance"). This is a PRINCIPLE, not just a list of banned words — before writing ANY sentence about this body of work, ask: does this phrasing suggest I independently built, owned, maintained, or led the construction of the model itself? If yes, rewrite it, regardless of which specific verb is used. Verbs like "developed," "built," "created," "maintained," "designed," or "led development of" are all problematic here UNLESS immediately paired with "in partnership with Finance" or equivalent, making clear Finance owned the model construction.
+- For SMALLER-SCOPE analyses at HP: I genuinely built standalone models myself (abbreviated versions of the larger model logic, later validated by Finance) — this CAN be claimed as real independent model-building, but must be explicitly scoped as "smaller-scope" or similar, not blended into the large-scope work.
+- For personal portfolio case study projects (outside of HP, e.g. Dazu Rock Capital materials): independent model-building can be claimed.
+- Never list "financial modeling" as a bare, unscoped skill tag in a Skills section — if it appears there, it must carry a qualifier (e.g., "financial modeling (smaller-scope, independent)" or similar) rather than standing alone as an unqualified skill.
+
+Python/R: only as AI-assisted code generation using Claude — never independent proficiency.`,
+  anythingElse: ''
+};
+
+// ---------------------------------------------------------------------------
+// GENERIC SCORING BASE — applies to every user, not person-specific. A
+// user's own answers (above) layer on top of this and take priority.
+// ---------------------------------------------------------------------------
+
+const BASE_SCORING_GUIDE = `SCORING SCALE:
+9-10: Exceptional — the role's core requirements directly match the candidate's primary, demonstrated experience.
+7-8: Strong — most requirements align well; only minor gaps.
+5-6: Moderate — meaningful overlap, but notable gaps in scope, tools, or domain.
+1-4: Weak — significant mismatch, missing must-have qualifications, or an explicit hard disqualifier applies.
+
+VERDICT THRESHOLDS:
+apply = score 7 or higher
+review = score 5-6
+pass = score 4 or below
+
+GENERAL GUIDANCE:
+- Distinguish between a title match and genuine functional fit — read the actual responsibilities and requirements, not just the job title.
+- Do not penalize for skills or tools listed as "nice to have" rather than explicitly required.
+- Treat anything in the candidate's own rules below as authoritative — it overrides general judgment where the two conflict.`;
+
+// ---------------------------------------------------------------------------
+// Storage — persists a user's resume/rule answers in this browser only
+// ---------------------------------------------------------------------------
+
+const STORAGE_KEY_RESUME = 'jds_resume_v1';
+const STORAGE_KEY_RULES = 'jds_rules_v2';
+
+function storageGet(key) {
+  try { return localStorage.getItem(key) || ''; } catch (e) { return ''; }
+}
+function storageSet(key, val) {
+  try { localStorage.setItem(key, val); return true; } catch (e) { return false; }
+}
+function storageRemove(key) {
+  try { localStorage.removeItem(key); } catch (e) {}
+}
+function safeParseJSON(s) {
+  try { return JSON.parse(s); } catch (e) { return null; }
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+let sessionResume = '';
+let sessionRuleAnswers = {};
+let screenResult = null;
+
+function getResume() { return sessionResume; }
+function assembleRulesText(answers, excludeIds) {
+  const parts = [];
+  RULE_QUESTIONS.forEach(q => {
+    if (excludeIds && excludeIds.includes(q.id)) return;
+    const val = ((answers && answers[q.id]) || '').trim();
+    if (val) parts.push(q.header + ':\n' + val);
+  });
+  return parts.join('\n\n');
+}
+function getRules() {
+  // Scoring should NOT see the detailed tailoring-language phrasing rules —
+  // those are instructions for how to WRITE a resume, not signals about
+  // whether the candidate is a good fit. Including them here just adds
+  // noise and risks skewing the score toward whatever skills those rules
+  // happen to discuss (e.g. SQL, financial modeling).
+  const custom = assembleRulesText(sessionRuleAnswers, ['languageRules']);
+  return custom
+    ? BASE_SCORING_GUIDE + '\n\nCANDIDATE\'S OWN RULES (authoritative — apply these specifically):\n' + custom
+    : BASE_SCORING_GUIDE + '\n\n(No candidate-specific rules provided — score using general judgment based on the resume and job posting alone.)';
+}
+function getCustomRules() { return assembleRulesText(sessionRuleAnswers); }
+function getKey() { return document.getElementById('apiKey').value.trim(); }
+
+// ---------------------------------------------------------------------------
+// Guided rule-question rendering (built with DOM APIs, not innerHTML, so
+// none of the question/placeholder text needs manual escaping)
+// ---------------------------------------------------------------------------
+
+function renderRuleFields(prefix) {
+  const container = document.getElementById(prefix + 'RulesContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  let lastGroup = null;
+  RULE_QUESTIONS.forEach(q => {
+    if (q.group !== lastGroup) {
+      const gh = document.createElement('div');
+      gh.className = 'group-head';
+      gh.textContent = q.group;
+      container.appendChild(gh);
+      lastGroup = q.group;
+    }
+    const field = document.createElement('div');
+    field.className = 'field';
+
+    const label = document.createElement('label');
+    label.className = 'sec';
+    label.style.cssText = 'text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--t1);font-family:var(--ff-body)';
+    label.textContent = q.label;
+    field.appendChild(label);
+
+    if (q.helper) {
+      const helper = document.createElement('div');
+      helper.className = 'config-note';
+      helper.style.margin = '4px 0 8px';
+      helper.textContent = q.helper;
+      field.appendChild(helper);
+    }
+
+    const ta = document.createElement('textarea');
+    ta.id = prefix + '_' + q.id;
+    ta.className = 'mono';
+    ta.rows = q.rows;
+    ta.placeholder = q.placeholder;
+    field.appendChild(ta);
+
+    container.appendChild(field);
+  });
+}
+
+function getRuleAnswers(prefix) {
+  const answers = {};
+  RULE_QUESTIONS.forEach(q => {
+    const el = document.getElementById(prefix + '_' + q.id);
+    answers[q.id] = el ? el.value.trim() : '';
+  });
+  return answers;
+}
+
+function setRuleAnswers(prefix, answers) {
+  RULE_QUESTIONS.forEach(q => {
+    const el = document.getElementById(prefix + '_' + q.id);
+    if (el) el.value = (answers && answers[q.id]) || '';
+  });
+}
+
+function renderExampleAnswers(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '';
+  RULE_QUESTIONS.forEach(q => {
+    const val = (EXAMPLE_RULE_ANSWERS[q.id] || '').trim();
+    if (!val) return;
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '10px';
+    const head = document.createElement('div');
+    head.style.cssText = 'font-size:10px;font-family:var(--ff-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:3px';
+    head.textContent = q.header;
+    const body = document.createElement('div');
+    body.style.cssText = 'font-size:12px;color:var(--t2);white-space:pre-wrap;line-height:1.6';
+    body.textContent = val;
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    el.appendChild(wrap);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Setup / onboarding
+// ---------------------------------------------------------------------------
+
+function initApp() {
+  renderRuleFields('welcome');
+  renderRuleFields('config');
+  renderExampleAnswers('exampleAnswers');
+  renderExampleAnswers('exampleAnswers2');
+  const resumeBox1 = document.getElementById('exampleResumeBox');
+  const resumeBox2 = document.getElementById('exampleResumeBox2');
+  if (resumeBox1) resumeBox1.textContent = EXAMPLE_RESUME;
+  if (resumeBox2) resumeBox2.textContent = EXAMPLE_RESUME;
+
+  const savedResume = storageGet(STORAGE_KEY_RESUME);
+  const savedRules = safeParseJSON(storageGet(STORAGE_KEY_RULES)) || {};
+  if (savedResume.trim()) {
+    sessionResume = savedResume;
+    sessionRuleAnswers = savedRules;
+    document.getElementById('resumeText').value = savedResume;
+    setRuleAnswers('config', savedRules);
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+  } else {
+    sessionResume = '';
+    sessionRuleAnswers = {};
+    document.getElementById('welcomeScreen').style.display = 'block';
+    document.getElementById('mainApp').style.display = 'none';
+  }
+}
+
+function finishSetup() {
+  const resume = document.getElementById('welcomeResume').value.trim();
+  if (!resume) { alert('Paste your resume before continuing — the tool needs it to screen roles against.'); return; }
+  const answers = getRuleAnswers('welcome');
+  sessionResume = resume;
+  sessionRuleAnswers = answers;
+  const saved = storageSet(STORAGE_KEY_RESUME, resume) && storageSet(STORAGE_KEY_RULES, JSON.stringify(answers));
+  document.getElementById('resumeText').value = resume;
+  setRuleAnswers('config', answers);
+  const note = document.getElementById('storageNote');
+  if (note) note.textContent = saved
+    ? 'Saved to this browser (localStorage) — it\'ll be here next time you visit this page, on this device and browser only. "Start over" clears it and returns you to setup.'
+    : 'Couldn\'t save to this browser\'s storage (it may be disabled, e.g. in private browsing). Your data will only last for this tab session.';
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  showTab('screen');
+}
+
+function startOver() {
+  if (!confirm('This clears your saved resume and rule answers from this browser and takes you back to setup. Continue?')) return;
+  storageRemove(STORAGE_KEY_RESUME);
+  storageRemove(STORAGE_KEY_RULES);
+  sessionResume = '';
+  sessionRuleAnswers = {};
+  document.getElementById('resumeText').value = '';
+  setRuleAnswers('config', {});
+  document.getElementById('welcomeResume').value = '';
+  setRuleAnswers('welcome', {});
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('welcomeScreen').style.display = 'block';
+}
+
+// ---------------------------------------------------------------------------
+// UI helpers
+// ---------------------------------------------------------------------------
+
+function showTab(name) {
+  ['screen','config','tracker','about'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach((btn,i) => {
+    btn.classList.toggle('active', ['screen','config','tracker','about'][i] === name);
+  });
+  document.querySelector('.shell').classList.toggle('wide', name === 'tracker');
+  if (name === 'tracker' && window.Tracker) window.Tracker.refresh();
+}
+
+function checkKey() {
+  const k = getKey();
+  const el = document.getElementById('keyStatus');
+  if (k.startsWith('sk-ant-') && k.length > 20) {
+    el.className = 'key-status ok';
+    el.textContent = '✓ Key looks valid';
+  } else if (k.length > 0) {
+    el.className = 'key-status no';
+    el.textContent = 'Key format looks off — should start with sk-ant-';
+  } else {
+    el.className = 'key-status no';
+    el.textContent = 'No key entered — required to use this tool';
+  }
+}
+
+function toggleKeyVis() {
+  const inp = document.getElementById('apiKey');
+  const btn = document.getElementById('keyToggle');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'hide'; }
+  else { inp.type = 'password'; btn.textContent = 'show'; }
+}
+
+function saveConfig() {
+  sessionResume = document.getElementById('resumeText').value;
+  sessionRuleAnswers = getRuleAnswers('config');
+  const saved = storageSet(STORAGE_KEY_RESUME, sessionResume) && storageSet(STORAGE_KEY_RULES, JSON.stringify(sessionRuleAnswers));
+  const msg = document.getElementById('saveMsg');
+  msg.textContent = saved ? 'Saved to this browser.' : 'Saved for this session only (browser storage unavailable).';
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; msg.textContent = 'Saved to this browser.'; }, 2500);
+}
+
+function loadExample() {
+  if (!confirm('This replaces your resume and rule answers with Chris Cannon\'s example. Continue?')) return;
+  document.getElementById('resumeText').value = EXAMPLE_RESUME;
+  setRuleAnswers('config', EXAMPLE_RULE_ANSWERS);
+  const msg = document.getElementById('saveMsg');
+  msg.textContent = 'Example loaded — click Save configuration to keep it, or edit first.';
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; msg.textContent = 'Saved to this browser.'; }, 3000);
+}
+
+function clearScreen() {
+  document.getElementById('jdInput').value = '';
+  document.getElementById('screenOutput').innerHTML = '';
+  screenResult = null;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.parentElement.querySelector('.copy-btn');
+    if (!btn) return;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// API
+// ---------------------------------------------------------------------------
+
+async function callClaude(prompt, maxTokens) {
+  const key = getKey();
+  if (!key) throw new Error('No API key entered.');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens || 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'API error ' + resp.status);
+  }
+  const data = await resp.json();
+  return data.content.map(b => b.text || '').join('');
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
+
+async function runScreen() {
+  const jd = document.getElementById('jdInput').value.trim();
+  if (!jd) { alert('Paste a job description first.'); return; }
+  if (!getKey()) { alert('Enter your Anthropic API key first.'); return; }
+
+  const out = document.getElementById('screenOutput');
+  out.innerHTML = `<div class="loading"><div class="spin"></div>Screening against your resume…</div>`;
+  screenResult = null;
+
+  const prompt = `You are evaluating a job posting against a candidate's resume to assess fit.
+
+CANDIDATE RESUME:
+${getResume()}
+
+JOB POSTING:
+${jd}
+
+${getRules()}
+
+Respond with ONLY a valid JSON object, no markdown fences, no extra text:
+{
+  "company": "<company name from the posting, best guess>",
+  "title": "<job title from the posting>",
+  "score": <integer 1-10>,
+  "verdict": <"apply" | "review" | "pass">,
+  "salary_recommendation": "<what salary to state if asked, e.g. '$130,000' — or 'Not listed — suggest $120,000–$130,000' if no range given>",
+  "fit_reasons": ["reason 1", "reason 2", "reason 3"],
+  "gaps": ["gap 1", "gap 2"],
+  "summary": "<2-3 sentence plain language assessment>",
+  "role_family": "<which role family this is, from the scoring guidance above>"
+}
+
+verdict: apply = score 7+, review = score 5-6, pass = score 4 or below`;
+
+  try {
+    const raw = await callClaude(prompt, 900);
+    const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+    const r = JSON.parse(clean);
+    screenResult = r;
+    const priorMatches = findScreenHistory(r.company);
+    saveScreenHistory(r);
+    renderScreen(r, priorMatches);
+  } catch(e) {
+    out.innerHTML = `<div class="error-box">Error: ${esc(e.message)}</div>`;
+  }
+}
+
+// ── Screening history (local to this browser) ──────────────────────────
+// Lightweight record of past screens so repeat companies/roles surface
+// their prior score and outcome instead of being scored in isolation
+// each time. Deterministic lookup, not sent back through the model.
+const SCREEN_HISTORY_KEY = 'jd_screen_history_v1';
+function loadScreenHistory() {
+  try { return JSON.parse(localStorage.getItem(SCREEN_HISTORY_KEY)) || []; }
+  catch { return []; }
+}
+function saveScreenHistory(r) {
+  const history = loadScreenHistory();
+  history.push({
+    company: r.company || '(unknown)',
+    title: r.title || '(untitled)',
+    score: r.score,
+    verdict: r.verdict,
+    date: new Date().toISOString().slice(0,10)
+  });
+  // Keep the file from growing unbounded — most recent 200 screens is plenty
+  const trimmed = history.slice(-200);
+  localStorage.setItem(SCREEN_HISTORY_KEY, JSON.stringify(trimmed));
+}
+function findScreenHistory(company) {
+  if (!company) return [];
+  const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const target = norm(company);
+  if (!target) return [];
+  return loadScreenHistory().filter(h => {
+    const hNorm = norm(h.company);
+    return hNorm && (hNorm.includes(target) || target.includes(hNorm));
+  });
+}
+
+function renderScreen(r, priorMatches) {
+  const score = r.score || 0;
+  const scoreColor = score >= 7 ? 'var(--green)' : score >= 5 ? 'var(--amber)' : 'var(--red)';
+  const vClass = r.verdict === 'apply' ? 'v-apply' : r.verdict === 'review' ? 'v-review' : 'v-pass';
+  const vText = r.verdict === 'apply' ? '✓ Apply' : r.verdict === 'review' ? '⚠ Review before applying' : '✕ Pass';
+  const fitItems = (r.fit_reasons||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+  const gapItems = (r.gaps||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+
+  const historyBanner = (priorMatches && priorMatches.length) ? `
+<div style="background:var(--amber-bg,#f5edda);border:1px solid var(--amber,#7a5c1e);border-radius:var(--rmd);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t1)">
+  <strong>You've screened ${priorMatches.length} role${priorMatches.length>1?'s':''} at ${esc(r.company||'this company')} before:</strong>
+  <ul style="margin:6px 0 0 18px;padding:0">
+    ${priorMatches.map(h => `<li>${esc(h.title)} — scored ${h.score}/10 (${esc(h.verdict)}) on ${esc(h.date)}</li>`).join('')}
+  </ul>
+</div>` : '';
+
+  document.getElementById('screenOutput').innerHTML = `
+<div class="divider"></div>
+${historyBanner}
+<div class="score-row">
+  <div class="score-num" style="color:${scoreColor}">${score}</div>
+  <div class="score-meta">
+    <div><span class="verdict ${vClass}">${vText}</span></div>
+    <div class="score-label">${esc(r.role_family||'')} &nbsp;·&nbsp; out of 10</div>
+    ${r.salary_recommendation ? `<div style="margin-top:8px"><span class="salary-pill">Salary to state: ${esc(r.salary_recommendation)}</span></div>` : ''}
+  </div>
+</div>
+
+<div class="summary-box">${esc(r.summary||'')}</div>
+
+<div class="two-col">
+  <div>
+    <div class="col-head fit">Fit</div>
+    <ul class="reasons fit">${fitItems}</ul>
+  </div>
+  <div>
+    <div class="col-head gap">Gaps</div>
+    <ul class="reasons gap">${gapItems}</ul>
+  </div>
+</div>
+
+${score >= 5 ? `
+<div class="step2-banner">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:13px;font-weight:500;color:var(--t1)">Generate tailored resume + cover note</div>
+      <p>First-draft application materials based on your resume and this JD. Review all output carefully before using.</p>
+    </div>
+    <button class="btn primary" onclick="runTailor()">Generate →</button>
+  </div>
+</div>` : `<div style="font-size:12px;color:var(--t3);font-family:var(--ff-mono);margin-top:8px">Score below 5 — tailored materials not generated.</div>`}
+
+<div id="tailorOutput"></div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Tailor
+// ---------------------------------------------------------------------------
+
+async function runTailor() {
+  const jd = document.getElementById('jdInput').value.trim();
+  const tout = document.getElementById('tailorOutput');
+  tout.innerHTML = `<div class="loading" style="margin-top:1.25rem"><div class="spin"></div>Generating tailored resume and cover note…</div>`;
+
+  const gapContext = screenResult ? `Match score: ${screenResult.score}/10. Role family: ${screenResult.role_family}. Key gaps identified: ${(screenResult.gaps||[]).join('; ')}` : '';
+
+  const prompt = `You are helping a job candidate tailor their resume and write a cover note for a specific role.
+
+CANDIDATE RESUME:
+${getResume()}
+
+JOB POSTING:
+${jd}
+
+${gapContext ? `SCREENING CONTEXT:\n${gapContext}\n` : ''}
+
+TAILORING INSTRUCTIONS:
+1. Write a tailored resume. Keep standard chronological order (most recent experience first). Reframe existing experience honestly to mirror the job description language. Do NOT fabricate experience, credentials, tools, or achievements the candidate does not have. Every bullet must be factually accurate to the candidate's real background. Where there are genuine gaps, do not hide them — let the honest framing do the work instead.
+
+2. Write a confident, direct cover note. Not formal. Not "I am writing to express my interest." Lead with the functional match explicitly. If there are meaningful gaps, acknowledge them briefly and honestly — this builds credibility rather than undermining it. Close with a natural, non-generic sign-off — vary the phrasing each time, and do NOT use the line "I'd welcome a conversation about whether my background is a fit" or close variants of it.
+
+3. Flag any claims in the resume or cover note that the candidate should pressure-test for accuracy before submitting — particularly around depth of technical claims, tool proficiency, or scope of ownership.
+
+4. CANDIDATE-SPECIFIC RULES — apply these exactly, even if it means rewording beyond what's in the candidate resume text above. These come directly from the candidate and take priority over general phrasing choices:
+${getCustomRules() || '(None provided.)'}
+
+Respond with ONLY a valid JSON object, no markdown fences:
+{
+  "resume": "<full tailored resume as plain text>",
+  "cover_note": "<cover note as plain text>",
+  "salary_suggestion": "<salary to state if asked, based on JD range if visible>",
+  "honest_flags": ["claim worth pressure-testing 1", "claim worth pressure-testing 2"]
+}`;
+
+  try {
+    const raw = await callClaude(prompt, 2800);
+    const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+    const r = JSON.parse(clean);
+    renderTailor(r);
+  } catch(e) {
+    tout.innerHTML = `<div class="error-box" style="margin-top:1.25rem">Error: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderTailor(r) {
+  const flags = r.honest_flags || [];
+  const flagsHtml = flags.length ? `
+<div class="flags-box">
+  <div class="flags-head">Review before submitting</div>
+  ${flags.map(f=>`<div class="flag-item">${esc(f)}</div>`).join('')}
+</div>` : '';
+
+  const salaryHtml = r.salary_suggestion ? `<div style="margin-bottom:1rem"><span class="salary-pill">Salary to state: ${esc(r.salary_suggestion)}</span></div>` : '';
+
+  document.getElementById('tailorOutput').innerHTML = `
+<div class="divider"></div>
+${flagsHtml}
+${salaryHtml}
+<div class="out-block">
+  <div class="out-label">Tailored resume</div>
+  <div class="out-text" id="resumeOut">${esc(r.resume||'')}</div>
+  <div class="btn-row" style="margin-top:12px">
+    <button class="btn sm copy-btn" onclick="copyText('resumeOut')">Copy resume</button>
+  </div>
+</div>
+<div class="out-block">
+  <div class="out-label">Cover note</div>
+  <div class="out-text" id="coverOut">${esc(r.cover_note||'')}</div>
+  <div class="btn-row" style="margin-top:12px">
+    <button class="btn sm copy-btn" onclick="copyText('coverOut')">Copy cover note</button>
+  </div>
+</div>
+<div style="font-size:11px;color:var(--t3);font-family:var(--ff-mono);line-height:1.5">These are first drafts. Review every claim for accuracy before submitting. The flags above are worth discussing before you apply.</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------------
+
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+<script>
+// ---------------------------------------------------------------------------
+// TRACKER — namespaced under window.Tracker so none of its internals
+// (esc, genId, STATUS, etc.) collide with the screener's own globals above.
+// All its DOM ids/classes are prefixed tk-/#tab-tracker so its CSS and
+// element lookups can't collide either.
+// ---------------------------------------------------------------------------
+const Tracker = (function(){
+  const STORE_KEY = 'app_tracker_v1';
+  const THEME_KEY = 'app_tracker_theme_v1';
+  let apps = [];
+  let editId = null;
+  let activeFilter = 'all';
+
+  const STATUS = {
+    applied:              { label: 'Applied',                              cls: 'tk-badge-applied' },
+    screen:               { label: 'Recruiter screen',                    cls: 'tk-badge-screen' },
+    interview:            { label: 'Interview',                            cls: 'tk-badge-interview' },
+    offer:                { label: 'Offer',                                cls: 'tk-badge-offer' },
+    rejected_app:         { label: 'Rejected — after application',        cls: 'tk-badge-rejected' },
+    rejected_screen:      { label: 'Rejected — after recruiter screen',   cls: 'tk-badge-rejected' },
+    rejected_hm:          { label: 'Rejected — after HM interview',       cls: 'tk-badge-rejected' },
+    rejected_late:        { label: 'Rejected — after HM (later round)',   cls: 'tk-badge-rejected' },
+    rejected_unspecified: { label: 'Rejected — stage unspecified',        cls: 'tk-badge-rejected' },
+    withdrawn:            { label: 'Withdrawn',                           cls: 'tk-badge-withdrawn' },
+    pending:              { label: 'No response',                        cls: 'tk-badge-pending' },
+  };
+  const STATUS_ORDER = ['applied','screen','interview','offer','rejected_app','rejected_screen','rejected_hm','rejected_late','rejected_unspecified','withdrawn','pending'];
+  // Statuses that should NOT count toward "Active" — all rejected variants, withdrawn, and no-response
+  const INACTIVE_STATUSES = ['rejected_app','rejected_screen','rejected_hm','rejected_late','rejected_unspecified','withdrawn','pending'];
+  const REJECTED_STATUSES = ['rejected_app','rejected_screen','rejected_hm','rejected_late','rejected_unspecified'];
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+  function load() {
+    try { apps = JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch { apps = []; }
+    let changed = false;
+    apps.forEach(a => { if (a.status === 'rejected') { a.status = 'rejected_unspecified'; changed = true; } });
+    if (changed) save();
+  }
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(apps)); } catch {} }
+
+  // ── Theme (scoped to #tab-tracker; independent of the rest of the page,
+  // which has no light mode of its own) ──────────────────────────────────
+  function applyTheme(theme) {
+    const root = document.getElementById('tab-tracker');
+    const btn = document.getElementById('tk-themeToggle');
+    if (theme === 'dark') { root.setAttribute('data-tk-theme','dark'); if (btn) btn.textContent = '☀️ Light mode'; }
+    else { root.removeAttribute('data-tk-theme'); if (btn) btn.textContent = '🌙 Dark mode'; }
+  }
+  function toggleTheme() {
+    const root = document.getElementById('tab-tracker');
+    const isDark = root.getAttribute('data-tk-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, next); } catch {}
+    applyTheme(next);
+  }
+  function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch {}
+    // Default dark (rather than the standalone tracker's light default) so
+    // it matches the rest of this page, which is always dark. Still fully
+    // independent and user-togglable, same as the standalone tool.
+    applyTheme(saved || 'dark');
+  }
+
+  // ── Filters ──────────────────────────────────────────────────────────
+  function buildFilters() {
+    const counts = {};
+    STATUS_ORDER.forEach(s => { counts[s] = apps.filter(a => a.status === s).length; });
+    const active = apps.filter(a => !INACTIVE_STATUSES.includes(a.status)).length;
+    const rejectedTotal = apps.filter(a => REJECTED_STATUSES.includes(a.status)).length;
+
+    const row = document.getElementById('tk-filterRow');
+    row.innerHTML = '';
+    row.appendChild(filterBtn('all', `All (${apps.length})`));
+    row.appendChild(filterBtn('active', `Active (${active})`));
+    STATUS_ORDER.forEach(s => {
+      if (REJECTED_STATUSES.includes(s)) return; // grouped into single "Rejected" chip below
+      if (counts[s] > 0) row.appendChild(filterBtn(s, `${STATUS[s].label} (${counts[s]})`));
+    });
+    if (rejectedTotal > 0) row.appendChild(filterBtn('rejected', `Rejected (${rejectedTotal})`));
+  }
+  function filterBtn(key, label) {
+    const b = document.createElement('button');
+    b.className = 'tk-filter-btn' + (activeFilter === key ? ' tk-active' : '');
+    b.textContent = label;
+    b.onclick = () => { activeFilter = key; buildFilters(); renderTable(); };
+    return b;
+  }
+
+  // ── Stats ────────────────────────────────────────────────────────────
+  function renderStats() {
+    const total = apps.length;
+    const active = apps.filter(a => !INACTIVE_STATUSES.includes(a.status)).length;
+    const screens = apps.filter(a => ['screen','interview','offer'].includes(a.status)).length;
+    const offers = apps.filter(a => a.status === 'offer').length;
+
+    document.getElementById('tk-stats').innerHTML = `
+      <div class="tk-stat"><div class="tk-stat-num">${total}</div><div class="tk-stat-label">Total</div></div>
+      <div class="tk-stat"><div class="tk-stat-num">${active}</div><div class="tk-stat-label">Active</div></div>
+      <div class="tk-stat"><div class="tk-stat-num">${screens}</div><div class="tk-stat-label">In process</div></div>
+      ${offers ? `<div class="tk-stat"><div class="tk-stat-num" style="color:var(--tk-acc)">${offers}</div><div class="tk-stat-label">Offers</div></div>` : ''}
+    `;
+  }
+
+  // ── Table ────────────────────────────────────────────────────────────
+  function getFiltered() {
+    const q = (document.getElementById('tk-searchInput').value || '').toLowerCase();
+    return apps.filter(a => {
+      const matchQ = !q || a.company.toLowerCase().includes(q) || a.role.toLowerCase().includes(q);
+      const matchF = activeFilter === 'all' ? true
+        : activeFilter === 'active' ? !INACTIVE_STATUSES.includes(a.status)
+        : activeFilter === 'rejected' ? REJECTED_STATUSES.includes(a.status)
+        : a.status === activeFilter;
+      return matchQ && matchF;
+    }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  }
+
+  function renderTable() {
+    const rows = getFiltered();
+    const tbody = document.getElementById('tk-tableBody');
+    const empty = document.getElementById('tk-emptyState');
+    const wrap = document.querySelector('#tab-tracker .tk-table-wrap');
+
+    if (!rows.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      wrap.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    wrap.style.display = 'block';
+
+    tbody.innerHTML = rows.map(a => {
+      const st = STATUS[a.status] || STATUS.applied;
+      const dateStr = a.date ? new Date(a.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      const nextHtml = a.next ? `<span class="tk-next-action">${esc(a.next)}</span>` : '<span style="color:var(--tk-ink3);font-size:12px">—</span>';
+      return `<tr>
+        <td class="tk-col-company">${esc(a.company)}</td>
+        <td class="tk-col-role">${esc(a.role)}</td>
+        <td class="tk-col-date">${dateStr}</td>
+        <td><span class="tk-badge ${st.cls}">${st.label}</span></td>
+        <td class="tk-col-salary">${esc(a.postedSalary||'—')}</td>
+        <td class="tk-col-salary">${esc(a.statedSalary||'—')}</td>
+        <td>${nextHtml}</td>
+        <td class="tk-col-notes" title="Click to expand/collapse" onclick="this.classList.toggle('tk-expanded')">${esc(a.notes||'')}</td>
+        <td class="tk-col-action">
+          <button class="tk-action-btn" onclick="Tracker.editApp('${a.id}')">Edit</button>
+          <button class="tk-action-btn tk-del" onclick="Tracker.deleteApp('${a.id}')">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Modal ────────────────────────────────────────────────────────────
+  function openModal(id) {
+    editId = id || null;
+    document.getElementById('tk-modalTitle').textContent = id ? 'Edit application' : 'Add application';
+    const a = id ? apps.find(x => x.id === id) : {};
+    document.getElementById('tk-f-company').value = a.company || '';
+    document.getElementById('tk-f-role').value = a.role || '';
+    document.getElementById('tk-f-date').value = a.date || new Date().toISOString().slice(0,10);
+    document.getElementById('tk-f-status').value = a.status || 'applied';
+    document.getElementById('tk-f-posted-salary').value = a.postedSalary || '';
+    document.getElementById('tk-f-stated-salary').value = a.statedSalary || '';
+    document.getElementById('tk-f-next').value = a.next || '';
+    document.getElementById('tk-f-notes').value = a.notes || '';
+    document.getElementById('tk-overlay').classList.add('tk-open');
+    setTimeout(() => document.getElementById('tk-f-company').focus(), 50);
+  }
+  function closeModal() { document.getElementById('tk-overlay').classList.remove('tk-open'); editId = null; }
+  function handleOverlayClick(e) { if (e.target === document.getElementById('tk-overlay')) closeModal(); }
+
+  function saveApplication() {
+    const company = document.getElementById('tk-f-company').value.trim();
+    const role = document.getElementById('tk-f-role').value.trim();
+    if (!company || !role) { alert('Company and role are required.'); return; }
+
+    const data = {
+      id: editId || genId(),
+      company,
+      role,
+      date: document.getElementById('tk-f-date').value,
+      status: document.getElementById('tk-f-status').value,
+      postedSalary: document.getElementById('tk-f-posted-salary').value.trim(),
+      statedSalary: document.getElementById('tk-f-stated-salary').value.trim(),
+      next: document.getElementById('tk-f-next').value.trim(),
+      notes: document.getElementById('tk-f-notes').value.trim(),
+    };
+
+    if (editId) {
+      const idx = apps.findIndex(a => a.id === editId);
+      if (idx !== -1) apps[idx] = data;
+    } else {
+      apps.unshift(data);
+    }
+
+    save(); closeModal(); refresh();
+  }
+
+  function editApp(id) { openModal(id); }
+
+  function deleteApp(id) {
+    if (!confirm('Delete this application?')) return;
+    apps = apps.filter(a => a.id !== id);
+    save(); refresh();
+  }
+
+  // ── Export ───────────────────────────────────────────────────────────
+  function exportCSV() {
+    if (!apps.length) { alert('No applications to export.'); return; }
+    const headers = ['Company','Role','Date Applied','Status','Posted Salary Range','Stated Salary','Next Action','Notes'];
+    const rows = apps.map(a => [
+      a.company, a.role, a.date, STATUS[a.status]?.label || a.status,
+      a.postedSalary, a.statedSalary, a.next, a.notes
+    ].map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = `applications-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  // ── Import ───────────────────────────────────────────────────────────
+  // CSV → this file's own storage, via FileReader + a real parser (handles
+  // quoted commas/newlines, matching the format exportCSV produces). This
+  // is the migration path for the 43 real entries — never a raw storage
+  // copy — and stays available afterward as an ordinary feature.
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i+1] === '"') { field += '"'; i++; }
+          else { inQuotes = false; }
+        } else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(field); field = ''; }
+        else if (c === '\r') { /* ignore */ }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else field += c;
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(c => c.trim() !== ''));
+  }
+
+  function labelToStatusKey(label) {
+    const found = Object.entries(STATUS).find(([,v]) => v.label === label);
+    return found ? found[0] : 'applied';
+  }
+
+  function handleImportFile(evt) {
+    const file = evt.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const rows = parseCSV(reader.result);
+        if (!rows.length) { alert('CSV appears empty.'); return; }
+        const header = rows[0];
+        const idx = {
+          company: header.indexOf('Company'),
+          role: header.indexOf('Role'),
+          date: header.indexOf('Date Applied'),
+          status: header.indexOf('Status'),
+          posted: header.indexOf('Posted Salary Range'),
+          stated: header.indexOf('Stated Salary'),
+          next: header.indexOf('Next Action'),
+          notes: header.indexOf('Notes'),
+        };
+        if (idx.company === -1 || idx.role === -1) {
+          alert('CSV header not recognized — expected the tracker\'s own export format (Company, Role, Date Applied, Status, ...).');
+          return;
+        }
+        const dataRows = rows.slice(1);
+        const imported = dataRows.map(r => ({
+          id: genId(),
+          company: r[idx.company] || '',
+          role: r[idx.role] || '',
+          date: r[idx.date] || '',
+          status: labelToStatusKey(r[idx.status] || ''),
+          postedSalary: r[idx.posted] || '',
+          statedSalary: r[idx.stated] || '',
+          next: r[idx.next] || '',
+          notes: r[idx.notes] || '',
+        }));
+        const msg = `Import ${imported.length} application${imported.length===1?'':'s'} from this CSV? This replaces the ${apps.length} entr${apps.length===1?'y':'ies'} currently in the tracker.`;
+        if (!confirm(msg)) return;
+        apps = imported;
+        save();
+        refresh();
+        alert(`Imported ${imported.length} applications.`);
+      } catch (e) {
+        alert('Failed to parse CSV: ' + e.message);
+      } finally {
+        evt.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────
+  function refresh() { renderStats(); buildFilters(); renderTable(); }
+  function init() {
+    initTheme();
+    load();
+    refresh();
+  }
+
+  return {
+    init, refresh,
+    openModal, closeModal, handleOverlayClick, saveApplication, editApp, deleteApp,
+    exportCSV, handleImportFile, toggleTheme, renderTable,
+  };
+})();
+
+window.addEventListener('DOMContentLoaded', Tracker.init);
+</script>
+
+<div style="text-align:center;font-family:var(--ff-mono);font-size:10px;color:var(--t3);padding:24px 0 4px">Rules build: 2026-09-16-v4 (screening history + team-management disqualifier)</div>
+<div style="text-align:center;font-family:var(--ff-mono);font-size:10px;color:var(--t3);padding:0 0 8px">Tracker merged: 2026-09-21-v1 (Stage 1 — feature parity + CSV import)</div>
+</body>
+</html>
