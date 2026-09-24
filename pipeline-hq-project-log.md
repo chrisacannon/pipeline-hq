@@ -1,6 +1,28 @@
 # Current Session
 
-**Stage:** 3 — Built and verified (base summary + one trigger). Deliberately holding at one trigger after a design discussion talked several candidate triggers back out of scope — see below.
+**Stage:** Cutover planning, in progress. All three build stages are complete (see below); current work is portfolio-readiness and deciding how this gets published.
+
+**Repo renamed `job-search-toolkit` → `pipeline-hq`** (this log file renamed to match). Chosen name after brainstorming several directions; landed on the "pipeline" framing since it matches the tool's actual mental model (screen → tailor → track → summarize) better than a more generic "toolkit" name. App's visible `<title>`/logo updated to match. A README.md was added.
+
+**Cutover decisions made so far:**
+- This will be a standalone repo — not folded back into `job-description-screener`, not replacing it.
+- The old `job-description-screener` repo: plan is to flip it private and separately disable its GitHub Pages site (confirmed these are two different actions — a private repo's Pages site stays live/public unless Pages is explicitly turned off in Settings). Not yet executed.
+- **Repo visibility for this project: staying private**, after weighing it — the live app itself will still be public via GitHub Pages (Pages can serve a public site from a private repo), but the source/history won't be. Chris's reasoning: this project is more personal-tool-plus-portfolio-reference than a pure work-sample repo, and he can grant specific people collaborator access directly if needed, without going fully public. This was a real reconsideration — earlier in the same conversation the plan had briefly been "make it fully public," which surfaced a second sensitive-data finding worth recording even though it's now moot for the public-repo path: `reference/app-tracker-live.html` (a Step-0 snapshot of the original standalone tracker) has the *original* real 33-entry `SEED` array hardcoded directly in its HTML/JS source, not just the checkpoint CSV. Both files still need to stay out of whatever GitHub Pages actually publishes, even with the repo staying private — Pages does not respect repo visibility for what it serves.
+- **Publishing plan (not yet executed):** GitHub Pages configured to publish from a `/docs` folder containing only `index.html`, so the live site works without exposing `checkpoints/` or `reference/app-tracker-live.html`, which stay at repo root, private-repo-only.
+- Separately flagged for Chris's own reconsideration (not urgent, not blocking): the embedded `EXAMPLE_RULE_ANSWERS` content is more tactically candid than a typical public example (e.g. explicit "AI-assisted, not independent proficiency" framing for Python/R) — he's inclined to anonymize/soften some of it before wide sharing, tabled for later.
+
+**Portfolio-readiness pass (this session):**
+- "See how Chris answered these" → "See examples"; "Load Chris's example answers" → "Load example answers" — less personal-sounding for something meant to be picked up by others.
+- Tracker now seeds one clearly-fictional "Example Corp" entry on first-ever empty load (mirrors the original standalone tracker's `seedIfEmpty()` pattern, fabricated data instead of real history) so the notes field has a visible template.
+- Tracker table widened again (max-width 1680px → 1900px, tighter padding, notes column 18%→17%) — measured directly (not just eyeballed) that overflow is down to a 1px rounding artifact at a 1920px viewport; real-world result depends on Chris's actual window width.
+- Considered, not built: a synthetic multi-row CSV (matching the tracker's import format) as a richer demo artifact than the single seeded row. Assessed as a nice-to-have, not essential — tabled unless wanted later.
+
+**Next actions:**
+- Build the `/docs`-only Pages publishing setup, verify the checkpoint CSV and reference file are genuinely unreachable via the published site, then enable Pages.
+- Decide on and execute the old screener repo's visibility + Pages disconnect.
+- Optional: anonymize `EXAMPLE_RULE_ANSWERS`; optional: synthetic multi-row CSV demo file.
+
+**Earlier — Stage 3 recap:** Built and verified (base summary + one trigger). Deliberately holding at one trigger after a design discussion talked several candidate triggers back out of scope — see below.
 
 **Last completed:** Stage 3 — a fifth "Summary" tab with deterministic monthly counts (applications sent, reached-screen-or-further, offers, status breakdown, most common rejection stage) plus an opt-in, trigger-gated AI insights layer. One trigger implemented: 5+ roles at the same company self-scored 7+ that never reached a screen or interview. Chris found a real bug (see below), fixed and reverified.
 
@@ -30,7 +52,9 @@
 
 ---
 
-# Job Search Toolkit — Project Log
+# Pipeline HQ — Project Log
+
+*(Named `job-search-toolkit` during development; renamed to `pipeline-hq` at cutover-planning time. References to the old name below are historical record, not stale — that's genuinely what it was called when each entry was written.)*
 
 ## Project Overview
 
