@@ -41,7 +41,7 @@ body{font-family:var(--ff-body);background:var(--bg);color:var(--t1);line-height
 
 /* Layout */
 .shell{max-width:760px;margin:0 auto;padding:2.5rem 1.25rem 4rem;transition:max-width .15s}
-.shell.wide{max-width:1680px}
+.shell.wide{max-width:1900px}
 header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--bd)}
 .logo{font-family:var(--ff-display);font-size:22px;font-weight:300;color:var(--t1);letter-spacing:-.02em;margin-bottom:4px}
 .logo span{color:var(--acc)}
@@ -163,7 +163,7 @@ details.example-details summary:hover{opacity:.8}
   --tk-overlay-bg:rgba(0,0,0,0.6);
   --tk-rmd:5px;--tk-rlg:8px;
 }
-#tab-tracker .tk-card{background:var(--tk-bg);border:0.5px solid var(--tk-rule2);border-radius:var(--rlg);padding:1.25rem;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:var(--tk-ink);transition:background .15s,color .15s}
+#tab-tracker .tk-card{background:var(--tk-bg);border:0.5px solid var(--tk-rule2);border-radius:var(--rlg);padding:1rem;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:var(--tk-ink);transition:background .15s,color .15s}
 #tab-tracker .tk-header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:1.5rem;padding-bottom:1.1rem;border-bottom:1px solid var(--tk-rule2);flex-wrap:wrap}
 #tab-tracker .tk-header-eyebrow{font-family:var(--ff-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tk-ink3);margin-bottom:5px}
 #tab-tracker .tk-header-title{font-size:20px;font-weight:500;color:var(--tk-ink);letter-spacing:-.02em}
@@ -200,11 +200,11 @@ details.example-details summary:hover{opacity:.8}
 #tab-tracker colgroup col.c-posted{width:8%}
 #tab-tracker colgroup col.c-stated{width:9%}
 #tab-tracker colgroup col.c-next{width:13%}
-#tab-tracker colgroup col.c-notes{width:18%}
+#tab-tracker colgroup col.c-notes{width:17%}
 #tab-tracker colgroup col.c-action{width:6%}
 #tab-tracker thead tr{border-bottom:1px solid var(--tk-rule2)}
-#tab-tracker th{font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tk-ink3);font-weight:500;padding:10px 11px;text-align:left;white-space:nowrap;background:var(--tk-th-bg)}
-#tab-tracker td{padding:11px 11px;border-bottom:1px solid var(--tk-rule);vertical-align:top;font-size:13px;word-wrap:break-word;overflow-wrap:break-word;color:var(--tk-ink)}
+#tab-tracker th{font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tk-ink3);font-weight:500;padding:9px 8px;text-align:left;white-space:nowrap;background:var(--tk-th-bg)}
+#tab-tracker td{padding:9px 8px;border-bottom:1px solid var(--tk-rule);vertical-align:top;font-size:13px;word-wrap:break-word;overflow-wrap:break-word;color:var(--tk-ink)}
 #tab-tracker tr:last-child td{border-bottom:none}
 #tab-tracker tr:hover td{background:var(--tk-hover-bg)}
 #tab-tracker .tk-col-company{font-weight:500;color:var(--tk-ink)}
@@ -290,7 +290,7 @@ details.example-details summary:hover{opacity:.8}
   <div class="section-title" style="font-size:15px;margin-top:1.75rem">Scoring rules <span style="font-family:var(--ff-body);font-weight:400;font-size:12px;color:var(--t3)">— optional, but recommended</span></div>
   <div class="section-sub">A few questions to help the model score roles accurately for you specifically. Skip anything that doesn't apply.
     <details class="example-details">
-      <summary>See how Chris answered these ↗</summary>
+      <summary>See examples ↗</summary>
       <div id="exampleAnswers" class="example-box"></div>
     </details>
   </div>
@@ -352,14 +352,14 @@ details.example-details summary:hover{opacity:.8}
   <div class="section-title">Scoring rules</div>
   <div class="section-sub">A few questions to help the model score roles accurately for you specifically. These are the only rules applied — there's no hidden default beyond general scoring judgment.
     <details class="example-details">
-      <summary>See how Chris answered these ↗</summary>
+      <summary>See examples ↗</summary>
       <div id="exampleAnswers2" class="example-box"></div>
     </details>
   </div>
   <div id="configRulesContainer"></div>
   <div class="btn-row">
     <button class="btn primary" onclick="saveConfig()">Save configuration</button>
-    <button class="btn" onclick="loadExample()">Load Chris's example answers</button>
+    <button class="btn" onclick="loadExample()">Load example answers</button>
     <button class="btn danger" onclick="startOver()">Start over</button>
   </div>
   <div id="saveMsg" style="font-size:12px;color:var(--green);margin-top:8px;font-family:var(--ff-mono);display:none">Saved to session.</div>
@@ -1286,6 +1286,25 @@ window.Tracker = (function(){
   }
   function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(apps)); } catch {} }
 
+  // One fabricated example entry, seeded only on first-ever load (empty
+  // storage) so the fields — especially notes — have a visible template.
+  // Clearly fictional; delete it once you've added your own.
+  function seedIfEmpty() {
+    if (apps.length > 0) return;
+    apps = [{
+      id: genId(),
+      company: 'Example Corp',
+      role: 'Sample Role — delete this and add your own',
+      date: new Date().toISOString().slice(0,10),
+      status: 'interview',
+      postedSalary: '$100,000–$120,000',
+      statedSalary: '$110,000',
+      next: 'Prep for second-round interview',
+      notes: 'This is a placeholder showing the notes format — delete it once you add real entries. A typical note might include a match assessment (e.g. "8/10 match"), any gaps acknowledged, salary reasoning, and recruiter or interview details.',
+    }];
+    save();
+  }
+
   // ── Filters ──────────────────────────────────────────────────────────
   function buildFilters() {
     const counts = {};
@@ -1531,6 +1550,7 @@ window.Tracker = (function(){
   function refresh() { renderStats(); buildFilters(); renderTable(); }
   function init() {
     load();
+    seedIfEmpty();
     refresh();
   }
 
