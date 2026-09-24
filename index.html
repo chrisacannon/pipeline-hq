@@ -238,6 +238,29 @@ details.example-details summary:hover{opacity:.8}
   #tab-tracker .tk-header-stats{gap:10px}
   #tab-tracker .tk-stat-num{font-size:16px}
 }
+
+/* ============================================================
+   Summary tab
+   ============================================================ */
+#sm-monthSelect{width:100%;background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd);color:var(--t1);font-family:var(--ff-body);font-size:13px;padding:8px 10px;outline:none}
+.sm-stats-row{display:flex;gap:16px;flex-wrap:wrap;margin:1.25rem 0}
+.sm-stat{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd);padding:12px 18px;min-width:100px}
+.sm-stat-num{font-family:var(--ff-mono);font-size:24px;color:var(--t1);line-height:1}
+.sm-stat-label{font-size:11px;color:var(--t3);margin-top:4px}
+.sm-breakdown{font-size:12px;color:var(--t2);line-height:1.9}
+.sm-breakdown b{color:var(--t1);font-weight:500}
+.sm-trigger-box{background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd);padding:12px 16px;margin:0.75rem 0;font-size:12px;color:var(--t2);line-height:1.6}
+.sm-insight-box{background:rgba(147,112,219,0.08);border:0.5px solid rgba(147,112,219,0.3);border-radius:var(--rmd);padding:14px 18px;margin-top:1rem;font-size:13px;color:var(--t1);line-height:1.7}
+.sm-insight-box ul{margin:8px 0 0 18px}
+.sm-insight-box li{margin-bottom:6px}
+.sm-caveat{font-size:11px;color:var(--t3);font-family:var(--ff-mono);margin-top:10px;padding-top:10px;border-top:0.5px solid var(--bd)}
+
+@media print{
+  .tabs, .key-section, .btn, button, #sm-monthSelect { display:none !important; }
+  #tab-screen, #tab-config, #tab-tracker, #tab-about, #welcomeScreen { display:none !important; }
+  #tab-summary { display:block !important; }
+  body, .shell { background:#fff !important; color:#000 !important; }
+}
 </style>
 </head>
 <body>
@@ -297,6 +320,7 @@ details.example-details summary:hover{opacity:.8}
   <button class="tab active" onclick="showTab('screen')">Screen a role</button>
   <button class="tab" onclick="showTab('config')">Resume & rules</button>
   <button class="tab" onclick="showTab('tracker')">Tracker</button>
+  <button class="tab" onclick="showTab('summary')">Summary</button>
   <button class="tab" onclick="showTab('about')">About</button>
 </div>
 
@@ -452,6 +476,34 @@ details.example-details summary:hover{opacity:.8}
       <button class="tk-btn tk-primary" onclick="Tracker.saveApplication()">Save</button>
     </div>
   </div>
+  </div>
+</div>
+
+<!-- SUMMARY TAB -->
+<div id="tab-summary" style="display:none">
+  <div class="section-title">Monthly Summary</div>
+  <div class="section-sub">Deterministic counts from your tracker data. No AI involved below this point unless you explicitly ask for insights.</div>
+
+  <div class="field" style="max-width:240px">
+    <label class="sec">Month</label>
+    <select id="sm-monthSelect" onchange="Summary.refresh()"></select>
+  </div>
+
+  <div id="sm-statsBlock"></div>
+
+  <div class="divider"></div>
+
+  <div class="section-title" style="font-size:15px">Scoring-calibration insights <span style="font-family:var(--ff-body);font-weight:400;font-size:12px;color:var(--t3)">— optional, advisory only</span></div>
+  <div class="section-sub">Checks a small set of deterministic patterns across all tracker entries (not just the selected month) — e.g. repeatedly scoring 7+ at the same company without ever reaching a screen or interview. The AI only runs if a real pattern is found, and only when you click Generate — never automatically, and nothing it says is written into your scoring rules for you.</div>
+
+  <div id="sm-triggerBlock"></div>
+  <div id="sm-insightsOutput"></div>
+
+  <div class="divider"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="Summary.exportMarkdown()">Export as Markdown</button>
+    <button class="btn" onclick="Summary.printSummary()">Print / Save as PDF</button>
+    <a class="btn" id="sm-emailLink" href="#" style="text-decoration:none;display:inline-block;text-align:center">Email myself</a>
   </div>
 </div>
 
@@ -829,15 +881,17 @@ function startOver() {
 // UI helpers
 // ---------------------------------------------------------------------------
 
+const TAB_NAMES = ['screen','config','tracker','summary','about'];
 function showTab(name) {
-  ['screen','config','tracker','about'].forEach(t => {
+  TAB_NAMES.forEach(t => {
     document.getElementById('tab-'+t).style.display = t === name ? 'block' : 'none';
   });
   document.querySelectorAll('.tab').forEach((btn,i) => {
-    btn.classList.toggle('active', ['screen','config','tracker','about'][i] === name);
+    btn.classList.toggle('active', TAB_NAMES[i] === name);
   });
-  document.querySelector('.shell').classList.toggle('wide', name === 'tracker');
+  document.querySelector('.shell').classList.toggle('wide', name === 'tracker' || name === 'summary');
   if (name === 'tracker' && window.Tracker) window.Tracker.refresh();
+  if (name === 'summary' && window.Summary) window.Summary.refresh();
 }
 
 function checkKey() {
@@ -1497,7 +1551,260 @@ window.Tracker = (function(){
 window.addEventListener('DOMContentLoaded', Tracker.init);
 </script>
 
+<script>
+// ---------------------------------------------------------------------------
+// SUMMARY — Stage 3. Deterministic monthly counts (always on) plus an
+// opt-in, advisory-only insights layer (manual button, gated behind
+// deterministic trigger conditions so the API only runs against a real
+// pattern). Namespaced under window.Summary, same pattern as Tracker.
+// Nothing here ever writes into the scoring rules automatically.
+// ---------------------------------------------------------------------------
+window.Summary = (function(){
+  let lastStats = null;
+  let lastTriggers = [];
+  let lastInsights = null;
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Score parsing (from the tracker's own free-text notes, e.g. "8/10
+  // match" or "7-8/10 match" — takes the higher end of a range) ──────────
+  function parseScore(notes) {
+    const m = (notes||'').match(/(\d{1,2})(?:\s*-\s*(\d{1,2}))?\s*\/\s*10/);
+    if (!m) return null;
+    const val = m[2] ? parseInt(m[2],10) : parseInt(m[1],10);
+    return Number.isFinite(val) ? val : null;
+  }
+
+  // ── Month list / selection ──────────────────────────────────────────
+  function getMonths(apps) {
+    const set = new Set();
+    apps.forEach(a => { if (a.date && a.date.length >= 7) set.add(a.date.slice(0,7)); });
+    return Array.from(set).sort().reverse();
+  }
+  function populateMonthSelect(apps) {
+    const sel = document.getElementById('sm-monthSelect');
+    const months = getMonths(apps);
+    const prevValue = sel.value;
+    sel.innerHTML = months.length
+      ? months.map(m => `<option value="${m}">${monthLabel(m)}</option>`).join('')
+      : `<option value="">No dated entries yet</option>`;
+    if (months.includes(prevValue)) sel.value = prevValue;
+    return sel.value;
+  }
+  function monthLabel(m) {
+    if (!m) return '';
+    const [y, mo] = m.split('-').map(Number);
+    return new Date(y, mo-1, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' });
+  }
+
+  // ── Deterministic monthly stats ──────────────────────────────────────
+  function computeMonthStats(apps, monthStr) {
+    const inMonth = monthStr ? apps.filter(a => (a.date||'').startsWith(monthStr)) : [];
+    const byLabel = {};
+    inMonth.forEach(a => { byLabel[a.statusLabel] = (byLabel[a.statusLabel]||0) + 1; });
+    const rejected = inMonth.filter(a => a.statusLabel.startsWith('Rejected —'));
+    const rejByStage = {};
+    rejected.forEach(a => { rejByStage[a.statusLabel] = (rejByStage[a.statusLabel]||0) + 1; });
+    let topStage = null, topCount = 0;
+    Object.entries(rejByStage).forEach(([k,v]) => { if (v > topCount) { topCount = v; topStage = k; } });
+    const screensPlus = inMonth.filter(a => ['screen','interview','offer'].includes(a.status)).length;
+    const offers = inMonth.filter(a => a.status === 'offer').length;
+    return { monthStr, total: inMonth.length, byLabel, topStage, topCount, screensPlus, offers, entries: inMonth };
+  }
+
+  function renderStats(stats) {
+    const block = document.getElementById('sm-statsBlock');
+    if (!stats.monthStr || !stats.total) {
+      block.innerHTML = `<div class="sm-stats-row"><div class="sm-stat"><div class="sm-stat-num">0</div><div class="sm-stat-label">Applications this month</div></div></div>`;
+      return;
+    }
+    const breakdown = Object.entries(stats.byLabel)
+      .sort((a,b) => b[1]-a[1])
+      .map(([label,count]) => `<div><b>${count}</b> — ${esc(label)}</div>`)
+      .join('');
+    block.innerHTML = `
+      <div class="sm-stats-row">
+        <div class="sm-stat"><div class="sm-stat-num">${stats.total}</div><div class="sm-stat-label">Applications sent</div></div>
+        <div class="sm-stat"><div class="sm-stat-num">${stats.screensPlus}</div><div class="sm-stat-label">Reached screen+</div></div>
+        <div class="sm-stat"><div class="sm-stat-num" style="${stats.offers ? 'color:var(--green)' : ''}">${stats.offers}</div><div class="sm-stat-label">Offers</div></div>
+      </div>
+      <div class="sm-breakdown">${breakdown}</div>
+      ${stats.topStage ? `<div class="sm-breakdown" style="margin-top:8px">Most common rejection stage this month: <b>${esc(stats.topStage)}</b> (${stats.topCount})</div>` : ''}
+    `;
+  }
+
+  // ── Trigger conditions (deterministic gates before any API call) ─────
+  // Open-ended by design — add more entries to TRIGGERS as patterns come
+  // up. Each one only looks at real tracker data; none of them call the
+  // API themselves, they just decide whether Generate should be offered.
+  const NO_ADVANCE_STATUSES = ['rejected_app', 'pending'];
+  const TRIGGERS = [
+    {
+      id: 'same-company-high-score-no-advance',
+      description: 'Scored 7+ on 5 or more roles at the same company without ever reaching a screen or interview',
+      check(apps) {
+        const groups = {};
+        apps.forEach(a => {
+          const score = parseScore(a.notes);
+          if (score === null || score < 7) return;
+          if (!NO_ADVANCE_STATUSES.includes(a.status)) return;
+          const key = (a.company||'').trim().toLowerCase();
+          if (!key) return;
+          (groups[key] ||= { company: a.company, entries: [] }).entries.push({ ...a, score });
+        });
+        return Object.values(groups).filter(g => g.entries.length >= 5);
+      },
+    },
+  ];
+
+  function runTriggers(apps) {
+    const fired = [];
+    TRIGGERS.forEach(t => {
+      const groups = t.check(apps);
+      groups.forEach(g => fired.push({ triggerId: t.id, description: t.description, ...g }));
+    });
+    return fired;
+  }
+
+  function renderTriggerBlock(triggers) {
+    const block = document.getElementById('sm-triggerBlock');
+    const out = document.getElementById('sm-insightsOutput');
+    if (!triggers.length) {
+      block.innerHTML = `<div class="sm-trigger-box">No patterns strong enough to flag yet — nothing to generate. (This is checked against your whole tracker, not just the selected month.)</div>`;
+      out.innerHTML = '';
+      return;
+    }
+    block.innerHTML = triggers.map((t, i) => `
+      <div class="sm-trigger-box">
+        <div style="color:var(--t1);margin-bottom:6px"><strong>${esc(t.company)}</strong> — ${esc(t.description)} (${t.entries.length} matching entries)</div>
+        <button class="btn sm" onclick="Summary.generateInsights(${i})">Generate insights →</button>
+      </div>
+    `).join('');
+  }
+
+  // ── Insights generation (opt-in, on-demand) ───────────────────────────
+  async function generateInsights(triggerIndex) {
+    const t = lastTriggers[triggerIndex];
+    if (!t) return;
+    const out = document.getElementById('sm-insightsOutput');
+    out.innerHTML = `<div class="loading"><div class="spin"></div>Reviewing ${t.entries.length} applications at ${esc(t.company)}…</div>`;
+
+    const entriesText = t.entries.map(e =>
+      `- ${e.role || '(role not recorded)'} — self-scored ${e.score}/10, status: ${e.statusLabel}\n  Notes: ${(e.notes||'').trim()}`
+    ).join('\n\n');
+
+    const prompt = `You are reviewing a job candidate's application outcomes to look for POSSIBLE scoring-calibration issues — cases where the candidate's self-assessed fit score didn't match what actually happened. This is advisory only: the candidate reviews your observations manually and decides whether to change anything themselves. You are NOT rewriting any rules.
+
+CANDIDATE'S CURRENT SCORING RULES:
+${typeof getRules === 'function' ? getRules() : '(not available)'}
+
+FLAGGED PATTERN: ${t.description}. Company: ${t.company}.
+
+${entriesText}
+
+Based on these notes, describe any patterns worth the candidate's attention — a specific requirement or gap that keeps appearing, a mismatch between self-assessed fit and real outcomes, or scope/seniority signals that might be miscalibrated. Be conservative: only note genuine, well-supported patterns visible across multiple entries here, not speculation from a single case. Do not propose specific rule text — just describe what you're observing and why it might be worth a closer look.
+
+Respond with ONLY a valid JSON object, no markdown fences:
+{
+  "observations": ["observation 1", "observation 2"],
+  "caveat": "<one sentence reminding the candidate this is a pattern in a small sample, not a certainty>"
+}`;
+
+    try {
+      const raw = await callClaude(prompt, 700);
+      const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+      const result = JSON.parse(clean);
+      lastInsights = { company: t.company, generatedAt: new Date().toISOString(), ...result };
+      renderInsights(lastInsights);
+    } catch (e) {
+      out.innerHTML = `<div class="error-box">Error: ${esc(e.message)}</div>`;
+    }
+  }
+
+  function renderInsights(result) {
+    const out = document.getElementById('sm-insightsOutput');
+    const items = (result.observations||[]).map(o => `<li>${esc(o)}</li>`).join('');
+    out.innerHTML = `
+      <div class="sm-insight-box">
+        <div style="font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">AI-generated observations — ${esc(result.company)} — review before acting, nothing here is applied automatically</div>
+        <ul>${items}</ul>
+        ${result.caveat ? `<div class="sm-caveat">${esc(result.caveat)}</div>` : ''}
+      </div>
+    `;
+  }
+
+  // ── Export ────────────────────────────────────────────────────────────
+  function buildMarkdown() {
+    const stats = lastStats;
+    let md = `# Job Search Monthly Summary — ${monthLabel(stats?.monthStr)}\n\n`;
+    md += `Generated: ${new Date().toLocaleString()}\n\n`;
+    if (stats && stats.total) {
+      md += `## Deterministic summary\n\n`;
+      md += `- Applications sent: ${stats.total}\n`;
+      md += `- Reached screen or further: ${stats.screensPlus}\n`;
+      md += `- Offers: ${stats.offers}\n`;
+      Object.entries(stats.byLabel).sort((a,b)=>b[1]-a[1]).forEach(([label,count]) => { md += `- ${count} — ${label}\n`; });
+      if (stats.topStage) md += `\nMost common rejection stage: **${stats.topStage}** (${stats.topCount})\n`;
+    } else {
+      md += `No applications recorded for this month.\n`;
+    }
+    if (lastInsights) {
+      md += `\n## AI-generated insights — ${lastInsights.company}\n\n_Advisory only, generated ${new Date(lastInsights.generatedAt).toLocaleString()}. Not applied automatically to scoring rules._\n\n`;
+      (lastInsights.observations||[]).forEach(o => { md += `- ${o}\n`; });
+      if (lastInsights.caveat) md += `\n> ${lastInsights.caveat}\n`;
+    }
+    return md;
+  }
+
+  function exportMarkdown() {
+    const md = buildMarkdown();
+    const blob = new Blob([md], {type:'text/markdown'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `job-search-summary-${lastStats?.monthStr || 'export'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function printSummary() {
+    showTab('summary');
+    setTimeout(() => window.print(), 50);
+  }
+
+  function updateEmailLink() {
+    const link = document.getElementById('sm-emailLink');
+    if (!link) return;
+    const stats = lastStats;
+    const subject = `Job search summary — ${monthLabel(stats?.monthStr)}`;
+    let body = stats && stats.total
+      ? `${stats.total} applications sent, ${stats.screensPlus} reached screen+, ${stats.offers} offers.\n\n`
+      : `No applications recorded this month.\n\n`;
+    body += lastInsights
+      ? `AI insights were generated for ${lastInsights.company} — export the Markdown version and attach it here for the full text.`
+      : `Export the Markdown version from the Summary tab and attach it here for full detail.`;
+    link.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────
+  function refresh() {
+    if (!window.Tracker) return;
+    const apps = Tracker.getApps();
+    const monthStr = populateMonthSelect(apps);
+    lastStats = computeMonthStats(apps, monthStr);
+    renderStats(lastStats);
+    lastTriggers = runTriggers(apps);
+    lastInsights = null;
+    renderTriggerBlock(lastTriggers);
+    updateEmailLink();
+  }
+
+  return { refresh, generateInsights, exportMarkdown, printSummary };
+})();
+</script>
+
 <div style="text-align:center;font-family:var(--ff-mono);font-size:10px;color:var(--t3);padding:24px 0 4px">Rules build: 2026-09-16-v4 (screening history + team-management disqualifier)</div>
 <div style="text-align:center;font-family:var(--ff-mono);font-size:10px;color:var(--t3);padding:0 0 8px">Tracker merged: 2026-09-21-v1 (Stage 1 — feature parity + CSV import)</div>
+<div style="text-align:center;font-family:var(--ff-mono);font-size:10px;color:var(--t3);padding:0 0 8px">Cross-reference: 2026-09-24-v1 (Stage 2) · Summary: 2026-09-24-v1 (Stage 3)</div>
 </body>
 </html>
