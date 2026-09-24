@@ -1,15 +1,20 @@
 # Current Session
 
-**Stage:** Cutover planning, in progress. All three build stages are complete (see below); current work is portfolio-readiness and deciding how this gets published.
+**Stage:** Cutover — live. All three build stages are complete; the app is now published and the repo is public.
 
-**Repo renamed `job-search-toolkit` → `pipeline-hq`** (this log file renamed to match). Chosen name after brainstorming several directions; landed on the "pipeline" framing since it matches the tool's actual mental model (screen → tailor → track → summarize) better than a more generic "toolkit" name. App's visible `<title>`/logo updated to match. A README.md was added.
+**Live at https://chrisacannon.github.io/pipeline-hq/** — GitHub Pages publishing from `main` branch, `/docs` folder. Verified directly (not assumed): the app loads and works at the root URL, and `README.md`/`pipeline-hq-project-log.md` both 404 when requested at that URL, confirming Pages only serves what's actually inside `/docs` regardless of what else is public in the repo.
 
-**Cutover decisions made so far:**
-- This will be a standalone repo — not folded back into `job-description-screener`, not replacing it.
-- The old `job-description-screener` repo: plan is to flip it private and separately disable its GitHub Pages site (confirmed these are two different actions — a private repo's Pages site stays live/public unless Pages is explicitly turned off in Settings). Not yet executed.
-- **Repo visibility for this project: staying private**, after weighing it — the live app itself will still be public via GitHub Pages (Pages can serve a public site from a private repo), but the source/history won't be. Chris's reasoning: this project is more personal-tool-plus-portfolio-reference than a pure work-sample repo, and he can grant specific people collaborator access directly if needed, without going fully public. This was a real reconsideration — earlier in the same conversation the plan had briefly been "make it fully public," which surfaced a second sensitive-data finding worth recording even though it's now moot for the public-repo path: `reference/app-tracker-live.html` (a Step-0 snapshot of the original standalone tracker) has the *original* real 33-entry `SEED` array hardcoded directly in its HTML/JS source, not just the checkpoint CSV. Both files still need to stay out of whatever GitHub Pages actually publishes, even with the repo staying private — Pages does not respect repo visibility for what it serves.
-- **Publishing plan (not yet executed):** GitHub Pages configured to publish from a `/docs` folder containing only `index.html`, so the live site works without exposing `checkpoints/` or `reference/app-tracker-live.html`, which stay at repo root, private-repo-only.
-- Separately flagged for Chris's own reconsideration (not urgent, not blocking): the embedded `EXAMPLE_RULE_ANSWERS` content is more tactically candid than a typical public example (e.g. explicit "AI-assisted, not independent proficiency" framing for Python/R) — he's inclined to anonymize/soften some of it before wide sharing, tabled for later.
+**Repo renamed `job-search-toolkit` → `pipeline-hq`** (this log file renamed to match). Chosen after brainstorming several directions; landed on "pipeline" since it matches the tool's actual mental model (screen → tailor → track → summarize) better than a generic "toolkit" name. App's `<title>`/logo updated to match. README.md added.
+
+**Sensitive-data cleanup, then repo made public:**
+- Two files had real personal data: the CSV checkpoint (43 real tracker entries) and `reference/app-tracker-live.html` (a Step-0 build snapshot with the *original* standalone tracker's real 33-entry `SEED` array hardcoded directly in its HTML/JS source — found during the public-repo discussion, not caught earlier). Also removed `reference/screener-index-live-2026-09-16-v4.html` (not sensitive, just build scaffolding no longer needed) while cleaning up.
+- Chris's call: rather than just keep these out of what gets published, remove them entirely so there's nothing to remember to manage going forward. Deleted from the tree, then **purged from the full git history** with `git filter-branch --index-filter 'git rm -r --cached --ignore-unmatch checkpoints reference' --prune-empty -- --all`, force-pushed. Verified exhaustively afterward — walked every commit in the rewritten history (`git rev-list --all` + `git ls-tree -r` per commit), confirmed neither path appears anywhere, not just spot-checked. History went from 13 commits to 11 (two commits that only ever touched those paths became empty and were auto-pruned).
+- Ran into a real environment issue partway through: Claude Code's own auto-mode classifier blocks `git filter-branch` as a destructive operation, even with explicit user go-ahead — Chris had to run the rewrite himself in his own terminal. That surfaced a second friction point: the repo lives inside a OneDrive-synced folder, and `git gc`'s cleanup step kept hitting OneDrive's file locks (dozens of "deletion failed, retry?" prompts). Resolved by skipping `gc` entirely (local disk housekeeping only, doesn't affect what's on GitHub) and just running the force-push directly.
+- Before flipping visibility, ran one more full-history scan for anything email/phone-shaped as a final check — found only Chris's own commit-author email and Claude's attribution line, nothing else. Repo flipped to public, then GitHub Pages enabled and verified live (see above).
+- **Reversed an earlier decision along the way**: had briefly settled on "stay private, publish via Pages from a private repo anyway" — turned out GitHub Pages isn't available for private repos on Chris's plan at all (confirmed directly via the API, not assumed), which forced the actual choice between paying for GitHub Pro, a third-party static host, a public mirror repo, or going fully public. Chris's reasoning for going public once that was the real choice: the sensitive-data reason for privacy was the main one and was now fully resolved; the other stated reasons (not a pure work-sample project, wanting curated access) were reasons he didn't *mind* being private, not reasons to actively avoid public.
+- Separately flagged for Chris's own reconsideration (not urgent, not blocking): the embedded `EXAMPLE_RULE_ANSWERS` content is more tactically candid than a typical public example (e.g. explicit "AI-assisted, not independent proficiency" framing for Python/R) — he's inclined to anonymize/soften some of it, tabled for later.
+
+**App restructured for publishing:** `index.html` moved to `docs/index.html` — single source of truth for both editing and what Pages publishes, no separate copy to keep in sync.
 
 **Portfolio-readiness pass (this session):**
 - "See how Chris answered these" → "See examples"; "Load Chris's example answers" → "Load example answers" — less personal-sounding for something meant to be picked up by others.
@@ -18,9 +23,8 @@
 - Considered, not built: a synthetic multi-row CSV (matching the tracker's import format) as a richer demo artifact than the single seeded row. Assessed as a nice-to-have, not essential — tabled unless wanted later.
 
 **Next actions:**
-- Build the `/docs`-only Pages publishing setup, verify the checkpoint CSV and reference file are genuinely unreachable via the published site, then enable Pages.
-- Decide on and execute the old screener repo's visibility + Pages disconnect.
-- Optional: anonymize `EXAMPLE_RULE_ANSWERS`; optional: synthetic multi-row CSV demo file.
+- Decide on and execute the old `job-description-screener` repo's visibility + Pages disconnect (plan: flip private, separately disable its Pages site in Settings — confirmed these are two different actions).
+- Optional: anonymize `EXAMPLE_RULE_ANSWERS`; optional: synthetic multi-row CSV demo file; optional local `git gc` once OneDrive isn't mid-sync (cosmetic, no functional impact).
 
 **Earlier — Stage 3 recap:** Built and verified (base summary + one trigger). Deliberately holding at one trigger after a design discussion talked several candidate triggers back out of scope — see below.
 

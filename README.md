@@ -2,7 +2,7 @@
 
 A single-file web tool that screens job postings against a resume, drafts tailored application materials, tracks every application, and surfaces monthly patterns — all in one place, powered by the Claude API. Merged from two separate tools ([job-description-screener](https://github.com/chrisacannon/job-description-screener) and a standalone application tracker) into one, with new cross-referencing and monthly-summary features layered on top.
 
-Live: *(pending — GitHub Pages is being set up to publish from `/docs` in this private repo)*
+Live: https://chrisacannon.github.io/pipeline-hq/
 
 The app lives at [`docs/index.html`](./docs/index.html) — that's both the file to edit and the one GitHub Pages publishes, so there's no separate copy to keep in sync. Everything else at repo root (this README, the project log) stays off the published site since Pages only serves what's inside `/docs`.
 
@@ -27,7 +27,7 @@ Each screening costs roughly $0.005–0.01 in API usage; tailored materials add 
 * The only network call this page makes is directly from your browser to Anthropic's API, using your own key.
 * The Summary tab's insights are generated on demand and not persisted anywhere — export as Markdown or PDF (via your browser's print dialog) if you want a record, or use the "Email myself" link to send it to your own inbox.
 * Because storage is per-browser, everyone who opens this page gets their own private setup — nothing is shared between visitors, and nothing here is shared with the two original tools this was merged from.
-* This repo is private. A checkpoint CSV and some build-reference snapshots that briefly contained real personal application data (including third-party contact info from recruiters) were removed and purged from the full git history — see the project log for details.
+* This repo is public. A checkpoint CSV and some build-reference snapshots that briefly contained real personal application data (including third-party contact info from recruiters) were removed and purged from the full git history before it was made public — see the project log for details.
 
 ## Project history
 
