@@ -977,8 +977,9 @@ verdict: apply = score 7+, review = score 5-6, pass = score 4 or below`;
     const r = JSON.parse(clean);
     screenResult = r;
     const priorMatches = findScreenHistory(r.company);
+    const trackerMatches = findTrackerHistory(r.company);
     saveScreenHistory(r);
-    renderScreen(r, priorMatches);
+    renderScreen(r, priorMatches, trackerMatches);
   } catch(e) {
     out.innerHTML = `<div class="error-box">Error: ${esc(e.message)}</div>`;
   }
@@ -1017,7 +1018,23 @@ function findScreenHistory(company) {
   });
 }
 
-function renderScreen(r, priorMatches) {
+// ── Tracker cross-reference (deterministic, read-only) ──────────────────
+// Same fuzzy company-name match as the screening-history banner above,
+// but against the Tracker tab's real application records — did I actually
+// apply here, what happened, what did the notes say. Not sent back through
+// the model; purely surfaced for the human reading the screen result.
+function findTrackerHistory(company) {
+  if (!company || !window.Tracker) return [];
+  const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const target = norm(company);
+  if (!target) return [];
+  return window.Tracker.getApps().filter(a => {
+    const aNorm = norm(a.company);
+    return aNorm && (aNorm.includes(target) || target.includes(aNorm));
+  });
+}
+
+function renderScreen(r, priorMatches, trackerMatches) {
   const score = r.score || 0;
   const scoreColor = score >= 7 ? 'var(--green)' : score >= 5 ? 'var(--amber)' : 'var(--red)';
   const vClass = r.verdict === 'apply' ? 'v-apply' : r.verdict === 'review' ? 'v-review' : 'v-pass';
@@ -1033,9 +1050,23 @@ function renderScreen(r, priorMatches) {
   </ul>
 </div>` : '';
 
+  const trackerBanner = (trackerMatches && trackerMatches.length) ? `
+<div style="background:rgba(76,141,204,0.10);border:1px solid rgba(76,141,204,0.35);border-radius:var(--rmd);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t1)">
+  <strong>Your tracker shows ${trackerMatches.length} real application${trackerMatches.length>1?'s':''} at ${esc(r.company||'this company')}:</strong>
+  <ul style="margin:6px 0 0 18px;padding:0">
+    ${trackerMatches.map(a => {
+      const dateStr = a.date ? esc(a.date) : 'date unknown';
+      const note = (a.notes||'').trim();
+      const noteSnippet = note ? esc(note.length > 180 ? note.slice(0,180) + '…' : note) : '';
+      return `<li style="margin-bottom:4px">${esc(a.role||'(role not recorded)')} — ${esc(a.statusLabel)} (applied ${dateStr})${noteSnippet ? `<div style="color:var(--t2);margin-top:2px">${noteSnippet}</div>` : ''}</li>`;
+    }).join('')}
+  </ul>
+</div>` : '';
+
   document.getElementById('screenOutput').innerHTML = `
 <div class="divider"></div>
 ${historyBanner}
+${trackerBanner}
 <div class="score-row">
   <div class="score-num" style="color:${scoreColor}">${score}</div>
   <div class="score-meta">
@@ -1166,7 +1197,7 @@ window.addEventListener('DOMContentLoaded', initApp);
 // All its DOM ids/classes are prefixed tk-/#tab-tracker so its CSS and
 // element lookups can't collide either.
 // ---------------------------------------------------------------------------
-const Tracker = (function(){
+window.Tracker = (function(){
   const STORE_KEY = 'jst_tracker_v1'; // see jst_* namespacing note near STORAGE_KEY_RESUME above
   let apps = [];
   let editId = null;
@@ -1449,10 +1480,17 @@ const Tracker = (function(){
     refresh();
   }
 
+  // Read-only accessor for the screener's cross-reference lookup (Stage 2).
+  // Returns copies (with a resolved statusLabel) so callers can't mutate
+  // the tracker's own state.
+  function getApps() {
+    return apps.map(a => ({ ...a, statusLabel: (STATUS[a.status] || STATUS.applied).label }));
+  }
+
   return {
     init, refresh,
     openModal, closeModal, handleOverlayClick, saveApplication, editApp, deleteApp,
-    exportCSV, handleImportFile, renderTable,
+    exportCSV, handleImportFile, renderTable, getApps,
   };
 })();
 
