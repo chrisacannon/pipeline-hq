@@ -1607,7 +1607,12 @@ window.Summary = (function(){
     rejected.forEach(a => { rejByStage[a.statusLabel] = (rejByStage[a.statusLabel]||0) + 1; });
     let topStage = null, topCount = 0;
     Object.entries(rejByStage).forEach(([k,v]) => { if (v > topCount) { topCount = v; topStage = k; } });
-    const screensPlus = inMonth.filter(a => ['screen','interview','offer'].includes(a.status)).length;
+    // "Reached screen+" means the application got at least to a recruiter
+    // screen at some point — true whether it's currently sitting at that
+    // stage or was later rejected there (rejected_screen/hm/late all imply
+    // a screen happened first; rejected_app/unspecified/pending don't).
+    const REACHED_SCREEN_STATUSES = ['screen','interview','offer','rejected_screen','rejected_hm','rejected_late'];
+    const screensPlus = inMonth.filter(a => REACHED_SCREEN_STATUSES.includes(a.status)).length;
     const offers = inMonth.filter(a => a.status === 'offer').length;
     return { monthStr, total: inMonth.length, byLabel, topStage, topCount, screensPlus, offers, entries: inMonth };
   }
