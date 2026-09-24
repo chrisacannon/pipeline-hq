@@ -1,8 +1,12 @@
 # Current Session
 
-**Stage:** 1 — Complete and verified. Stage 2 not yet started. Stage 3 scoped/designed, not yet built.
+**Stage:** 2 — Complete and verified. Stage 3 designed, not yet built.
 
-**Last completed:** Merged the JD screener and application tracker into one file (`index.html`) as a fourth "Tracker" tab, built in a new, isolated private repo (`job-search-toolkit`) so neither live tool was touched. Added a CSV Import feature to the tracker (real parser, not a raw storage copy) as the migration path for Chris's real entries.
+**Last completed:** Stage 2 cross-referencing — screening a JD now surfaces a second banner (alongside the existing screening-history one) showing real tracker application history at that company: role, status, date applied, notes snippet. Deterministic fuzzy match, same pattern as the existing screening-history lookup, read-only, never fed back into scoring/tailoring. Verified locally by Chris (screened a JD for a company already in the tracker; banner appeared correctly).
+
+**Bug found and fixed during Stage 2 testing:** `const Tracker = (function(){...})();` at script scope does not attach to `window` — only the bare `Tracker` identifier is globally accessible. The new `findTrackerHistory()` and the pre-existing tab-switch refresh (`showTab()`) were both written against `window.Tracker` and were silently no-op-ing. Changed the declaration to `window.Tracker = ...`; both now work. (The tab-switch refresh bug predates Stage 2 — it existed since Stage 1 but never visibly mattered since data doesn't change between tab switches on its own.)
+
+**Earlier — Stage 1 recap:** Merged the JD screener and application tracker into one file (`index.html`) as a fourth "Tracker" tab, built in a new, isolated private repo (`job-search-toolkit`) so neither live tool was touched. Added a CSV Import feature to the tracker (real parser, not a raw storage copy) as the migration path for Chris's real entries.
 
 **Critical bug found and fixed mid-build:** The merged tool initially reused the exact same `localStorage` keys as both live tools. Chrome doesn't reliably scope `localStorage` per exact `file://` path, so opening the merged file read the live tracker's real 43 entries directly out of shared storage — discovered when Chris opened the file and the Tracker tab showed all 43 entries before any import happened. No data was lost (read-only at that point), but it broke the isolation the whole project was built around. Fixed by namespacing every storage key to `jst_*`. Re-verified after the fix: Tracker tab started empty, CSV import brought in exactly 43 entries.
 
@@ -13,7 +17,6 @@
 **Stage 3 design settled (not yet built):** Monthly summary gets an opt-in "Generate insights" feature on top of the deterministic counts — AI-generated, advisory-only suggestions about possible scoring-rule tweaks, gated behind deterministic trigger conditions (starting with: 5+ roles at the same company scored 7+ without reaching interview/screen) so the AI only runs against real patterns, not noise. Manual button only, never automatic; output never writes into the actual scoring rules. Full design notes below under Stage 3.
 
 **Next actions:**
-- Stage 2 — cross-reference screener JD screens against tracker company history (deterministic, read-only, surfaced the same way as the existing screening-history banner)
 - Stage 3 — build the deterministic monthly counts first, then the opt-in insights layer described below
 - Cutover decision (repoint GitHub Pages / fold into old repo / keep standalone) — intentionally not decided yet, deferred until Chris explicitly approves cutover after full verification
 
@@ -36,7 +39,7 @@ A merge of two previously-separate, working single-file HTML tools — a JD scre
 | Stage | Name | Status |
 |---|---|---|
 | 1 | Tracker as a fourth tab, full feature parity, verified CSV migration | Complete |
-| 2 | Cross-referencing (screener ↔ tracker, deterministic, read-only) | Not started |
+| 2 | Cross-referencing (screener ↔ tracker, deterministic, read-only) | Complete |
 | 3 | Monthly summary: deterministic counts + opt-in AI insights layer | Designed, not built |
 
 ## Stage 1 — Tracker Merge (COMPLETE)
@@ -65,9 +68,20 @@ Claude's built-in browser preview sandboxes local files as `data:` URLs (no `loc
 - Dropped the tracker's independent light/dark toggle; now always dark, matching the rest of the tool.
 - Widened the table layout (`shell.wide` 1500px → 1680px, trimmed cell/card padding) to remove the horizontal scrollbar at normal desktop width.
 
-## Stage 2 — Cross-Referencing (NOT STARTED)
+## Stage 2 — Cross-Referencing (COMPLETE)
 
-When screening a JD, check the tracker's own data (not just the existing `jst_screen_history_v1` fuzzy-match banner) for real application history at that company — did Chris actually apply, what was the outcome, relevant notes — and surface it the same way: deterministic lookup, read-only, not fed back into the scoring/tailoring prompts.
+*Completed: September 2026*
+
+### What was built
+- A second banner in the Screen a role tab, alongside the existing `jst_screen_history_v1` fuzzy-match banner: when the screened company matches a tracker entry (same normalize-and-substring fuzzy match as the screening-history lookup), shows role, status label, date applied, and a notes snippet (truncated ~180 chars) for each real application at that company.
+- `Tracker.getApps()` — a new read-only accessor returning copies of tracker entries with a resolved `statusLabel`, so the screener side never touches Tracker's internal state directly.
+- Deterministic lookup only — not sent back through the model, same category as the existing screening-history feature.
+
+### Bug found during verification
+`const Tracker = (function(){...})();` at script scope does not attach to `window`. Both the new cross-reference lookup and the pre-existing tab-switch refresh referenced `window.Tracker` and were silently no-op-ing (returning `[]` / doing nothing rather than erroring, which is why it wasn't obvious). Fixed by changing the declaration to `window.Tracker = ...`. Caught via direct browser testing of `findTrackerHistory()`, not code review.
+
+### Verification method
+Claude tested the real code path (shimmed `localStorage`, seeded a tracker entry, called `findTrackerHistory()` and `renderScreen()` directly with messy casing/punctuation to confirm fuzzy matching) for the same environment reasons as Stage 1. Chris then verified for real: opened the local file, screened a JD for a company already in his tracker, confirmed the banner appeared correctly.
 
 ## Stage 3 — Monthly Summary & Insights (DESIGNED, NOT BUILT)
 
