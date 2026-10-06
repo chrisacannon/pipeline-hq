@@ -288,7 +288,7 @@ details.example-details summary:hover{opacity:.8}
 <!-- WELCOME / SETUP -->
 <div id="welcomeScreen" style="display:none">
   <div class="section-title">Welcome — let's set up your profile</div>
-  <div class="section-sub">This tool screens job postings against your resume and drafts tailored applications. Everything below is saved only in this browser — nothing is sent anywhere except directly to Anthropic's API when you run a screening.</div>
+  <div class="section-sub">This tool screens job postings against your resume and drafts tailored applications. Nothing is collected: everything you enter is saved only in this browser, and the only thing that leaves it is what you choose to send to Anthropic's API (with your own key) when you screen a role, generate tailored materials, or generate insights. The full privacy details are on the About tab once you're set up.</div>
 
   <div class="field">
     <label class="sec">Your resume</label>
@@ -312,7 +312,9 @@ details.example-details summary:hover{opacity:.8}
 
   <div class="btn-row" style="margin-top:1.25rem">
     <button class="btn primary" onclick="finishSetup()">Save & start screening →</button>
+    <button class="btn" onclick="document.getElementById('profileImportFile').click()">Restore from backup</button>
   </div>
+  <div class="config-note" style="margin-top:8px">Already exported a backup of your resume and rules? "Restore from backup" loads it and skips the questions above.</div>
 </div>
 
 <!-- MAIN APP -->
@@ -376,6 +378,12 @@ details.example-details summary:hover{opacity:.8}
     <button class="btn" onclick="loadExample()">Load example answers</button>
     <button class="btn danger" onclick="startOver()">Start over</button>
   </div>
+  <div class="btn-row">
+    <button class="btn" onclick="exportProfile()">Export backup</button>
+    <button class="btn" onclick="document.getElementById('profileImportFile').click()">Import backup</button>
+    <input type="file" id="profileImportFile" accept=".json,application/json" style="display:none" onchange="importProfile(event)">
+  </div>
+  <div class="config-note" style="margin-top:8px">A backup is one JSON file holding your resume and rule answers — it contains your resume, so keep it somewhere private. Importing replaces what's currently saved here. Tracker entries have their own CSV export in the Tracker tab.</div>
   <div id="saveMsg" style="font-size:12px;color:var(--green);margin-top:8px;font-family:var(--ff-mono);display:none">Saved to session.</div>
   <div class="config-note" style="margin-top:10px" id="storageNote">Saved to this browser (localStorage) — it'll be here next time you visit this page, on this device and browser only. "Start over" clears it and returns you to setup.</div>
 </div>
@@ -540,9 +548,19 @@ details.example-details summary:hover{opacity:.8}
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Tracker:</strong> Log every application — status, salary, next action, notes — with a dated, expandable status timeline per application, CSV export/import, and an "Active" filter that excludes rejected, withdrawn, and no-response entries.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Summary:</strong> A monthly recap computed directly from your tracker. Optional "pipeline insights" appear only when a deterministic pattern shows up in your data (for example, several rejections arriving the day after applying, which usually points to automated screening); generating the written observations is a button you click, and nothing it says is ever applied to your scoring rules automatically.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem"><strong style="color:var(--t1);font-weight:500">Using this tool:</strong> Enter your Anthropic API key (get one at console.anthropic.com), then paste any job description and screen it. Each screening costs roughly $0.005-0.01. Resume + cover note generation adds another $0.01-0.02.</p>
-  <div class="section-title">Setup & your data</div>
+  <div class="section-title">Setup</div>
   <div class="section-sub" style="margin-bottom:1rem">Built for anyone to pick up and use with their own background.</div>
-  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem">The first time you open this page, you'll paste in your resume and answer a short set of optional questions about how you'd like roles scored. Both fields start blank — you can peek at Chris Cannon's actual resume and his answers to those same questions via the "See an example" links, without them ever landing in your own fields. Your answers are saved in this browser's local storage, so they're there the next time you open the page on this device. Nothing is uploaded to a server; the only network call this page makes is directly from your browser to Anthropic's API, using your own key. Use "Start over" in the Resume & rules tab to clear your saved data and go through setup again — useful if you're screening for a different person or want to start fresh.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem">The first time you open this page, you'll paste in your resume and answer a short set of optional questions about how you'd like roles scored. Both fields start blank — the "See examples" links show a fictional sample resume and sample answers, and they only land in your own fields if you choose "Load example answers." In the Resume & rules tab, "Export backup" saves your resume and rules as a file you can restore later, and "Start over" clears your saved data so you can run setup again.</p>
+  <div class="section-title">Privacy — what happens to your data</div>
+  <div class="section-sub" style="margin-bottom:1rem">Short version: nothing is collected. Here is everything this page does with your information, including the parts that aren't obvious.</div>
+  <ul style="font-size:13px;color:var(--t2);line-height:1.7;margin:0 0 1.25rem 18px">
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">No collection.</strong> No accounts, analytics, cookies, tracking scripts, or server of its own. Nobody running this tool receives your resume, notes, or tracker.</li>
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Where your data lives.</strong> Your resume, rule answers, tracker entries, and screening history are saved in this browser's local storage for this site, on this device only. Clearing your browser's site data deletes them, so use Export backup (resume &amp; rules) and Export CSV (tracker) to keep copies.</li>
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">What leaves your browser, and only when you click.</strong> Screen, Generate (tailored materials), and Generate insights send text directly from your browser to Anthropic's API using your own key: your resume, the job description, and your scoring rules, and for insights, the notes from the tracker entries involved. Anthropic's terms and privacy policy govern what happens to it there. This page never stores your key; it exists only in the page until you reload or close it.</li>
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Two other network requests you don't control.</strong> The page loads its fonts from Google Fonts when it opens, so Google can see your IP address and browser details, as with any site that uses it. And the page is served by GitHub Pages, which, like any web host, may keep ordinary server logs (such as IP addresses) that this tool has no access to.</li>
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Files you export</strong> (CSV, JSON backups, Markdown summaries) are saved to your own device; nothing is uploaded. Backups contain your resume and tracker notes, so store them somewhere private.</li>
+    <li><strong style="color:var(--t1);font-weight:500">"Email myself"</strong> only opens your own email app with a short summary pre-filled; nothing is sent unless you press send.</li>
+  </ul>
   <p style="font-size:13px;color:var(--t2);line-height:1.7">Originally built by Chris Cannon for his own job search · <a href="https://chrisacannon.github.io" style="color:var(--acc);text-decoration:none" target="_blank">chrisacannon.github.io</a></p>
 </div>
 
@@ -597,7 +615,7 @@ Tools: SAP, Microsoft Office Suite, Qlik, Tableau, Claude (including Claude API-
 // generalized set of questions. Each captures one piece of guidance that
 // actually changes how the model scores/tailors, without assuming anything
 // about the candidate's field. Any user answers these for their own
-// background; EXAMPLE_RULE_ANSWERS below shows how Chris answered them.
+// background; EXAMPLE_RULE_ANSWERS below shows how a fictional sample candidate answered them.
 // ---------------------------------------------------------------------------
 
 const RULE_QUESTIONS = [
@@ -853,6 +871,15 @@ function initApp() {
   const resumeBox2 = document.getElementById('exampleResumeBox2');
   if (resumeBox1) resumeBox1.textContent = EXAMPLE_RESUME;
   if (resumeBox2) resumeBox2.textContent = EXAMPLE_RESUME;
+  ['exampleResumeBox', 'exampleResumeBox2', 'exampleAnswers', 'exampleAnswers2'].forEach(id => {
+    const box = document.getElementById(id);
+    if (!box || (box.previousElementSibling && box.previousElementSibling.classList.contains('fictional-note'))) return;
+    const note = document.createElement('div');
+    note.className = 'config-note fictional-note';
+    note.style.marginTop = '8px';
+    note.textContent = 'Fictional example — names, employers, schools, and figures are invented.';
+    box.parentNode.insertBefore(note, box);
+  });
 
   const savedResume = storageGet(STORAGE_KEY_RESUME);
   const savedRules = safeParseJSON(storageGet(STORAGE_KEY_RULES)) || {};
@@ -953,13 +980,73 @@ function saveConfig() {
 }
 
 function loadExample() {
-  if (!confirm('This replaces your resume and rule answers with Chris Cannon\'s example. Continue?')) return;
+  if (!confirm('This replaces the resume and rule answers in these fields with the fictional example. Continue?')) return;
   document.getElementById('resumeText').value = EXAMPLE_RESUME;
   setRuleAnswers('config', EXAMPLE_RULE_ANSWERS);
   const msg = document.getElementById('saveMsg');
   msg.textContent = 'Example loaded — click Save configuration to keep it, or edit first.';
   msg.style.display = 'block';
   setTimeout(() => { msg.style.display = 'none'; msg.textContent = 'Saved to this browser.'; }, 3000);
+}
+
+// ── Resume & rules backup (JSON file on the user's own device) ─────────
+// Export reads what's in the fields now; import validates the file, replaces
+// what's saved, and saves it immediately. Nothing here touches the network.
+const PROFILE_BACKUP_TYPE = 'pipeline-hq-profile';
+
+function exportProfile() {
+  const resume = document.getElementById('resumeText').value;
+  const rules = getRuleAnswers('config');
+  if (!resume.trim() && Object.values(rules).every(v => !v)) {
+    alert('Nothing to export yet — add a resume or some rule answers first.');
+    return;
+  }
+  const payload = { type: PROFILE_BACKUP_TYPE, version: 1, exportedAt: new Date().toISOString(), resume, rules };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pipeline-hq-profile-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importProfile(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const p = JSON.parse(reader.result);
+      if (!p || p.type !== PROFILE_BACKUP_TYPE || typeof p.resume !== 'string' || !p.rules || typeof p.rules !== 'object') {
+        throw new Error('this doesn\'t look like a Pipeline HQ profile backup');
+      }
+      const answers = {};
+      RULE_QUESTIONS.forEach(q => { answers[q.id] = typeof p.rules[q.id] === 'string' ? p.rules[q.id] : ''; });
+
+      const hasSaved = sessionResume.trim() || Object.values(sessionRuleAnswers).some(v => v && v.trim());
+      const when = p.exportedAt ? ` (exported ${new Date(p.exportedAt).toLocaleDateString()})` : '';
+      if (hasSaved && !confirm(`Replace your saved resume and rule answers with this backup${when}? This can't be undone — export a backup of your current ones first if you might want them.`)) return;
+
+      sessionResume = p.resume;
+      sessionRuleAnswers = answers;
+      const saved = storageSet(STORAGE_KEY_RESUME, sessionResume) && storageSet(STORAGE_KEY_RULES, JSON.stringify(answers));
+      document.getElementById('resumeText').value = sessionResume;
+      setRuleAnswers('config', answers);
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      showTab('config');
+      const msg = document.getElementById('saveMsg');
+      msg.textContent = saved ? 'Backup restored and saved to this browser.' : 'Backup restored for this session only (browser storage unavailable).';
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; msg.textContent = 'Saved to this browser.'; }, 4000);
+    } catch (e) {
+      alert('Couldn\'t restore that file: ' + e.message + '.');
+    } finally {
+      evt.target.value = '';
+    }
+  };
+  reader.readAsText(file);
 }
 
 function clearScreen() {

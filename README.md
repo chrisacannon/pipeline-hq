@@ -15,7 +15,7 @@ The app lives at [`docs/index.html`](./docs/index.html) — that's both the file
 
 ## Getting started
 
-1. Open the page — it starts blank except for one fabricated example row in the Tracker tab (delete it once you add your own). The first visit walks through setup: paste your resume, optionally answer a set of scoring-rule questions (target roles, hard disqualifiers, skills that shouldn't count against you, language rules for tailored drafts, etc.).
+1. Open the page — it starts blank except for one fabricated example row in the Tracker tab (delete it once you add your own). The first visit walks through setup: paste your resume, optionally answer a set of scoring-rule questions (target roles, hard disqualifiers, skills that shouldn't count against you, language rules for tailored drafts, etc.). The "See examples" links show a fictional sample candidate. Already have a backup file? "Restore from backup" skips the questions.
 2. Enter your own Anthropic API key (get one at [console.anthropic.com](https://console.anthropic.com/)). Used only to call the API directly from your browser, never saved — you'll re-enter it each visit.
 3. Screen a role, or head to the Tracker tab and add/import your applications.
 
@@ -23,10 +23,13 @@ Each screening costs roughly $0.005–0.01 in API usage; tailored materials add 
 
 ## Your data
 
-* Resume, rule answers, tracker entries, and screening history are all saved in your browser's local storage only, tied to this page's URL. Nothing is uploaded to a server.
-* The only network call this page makes is directly from your browser to Anthropic's API, using your own key.
-* The Summary tab's insights are generated on demand and not persisted anywhere — export as Markdown or PDF (via your browser's print dialog) if you want a record, or use the "Email myself" link to send it to your own inbox.
-* Because storage is per-browser, everyone who opens this page gets their own private setup — nothing is shared between visitors, and nothing here is shared with the two original tools this was merged from.
+**Nothing is collected.** There are no accounts, analytics, cookies, or tracking scripts, and no server behind this page. Here is everything it does with your information, including the parts that aren't obvious:
+
+* **Where it lives:** your resume, rule answers, tracker entries, and screening history are saved in your browser's local storage for this site, on this device only. Clearing your browser's site data deletes them, so use **Export backup** (resume & rules, a JSON file) and **Export CSV** (tracker) to keep copies. Backups contain your resume and notes — store them somewhere private.
+* **What leaves your browser, and only when you click:** Screen, Generate (tailored materials), and Generate insights send text directly from your browser to Anthropic's API using your own key — your resume, the job description, your scoring rules, and, for insights, the notes from the tracker entries involved. Anthropic's terms and privacy policy govern it from there. The key itself is never stored by this page.
+* **Two network requests you don't control:** the page loads its fonts from Google Fonts when it opens (so Google can see your IP address and browser details, as with any site using it), and it's served by GitHub Pages, which, like any host, may keep ordinary server logs this tool has no access to.
+* **Summary insights** are generated on demand and not persisted anywhere — export as Markdown or PDF (via your browser's print dialog) if you want a record, or use the "Email myself" link, which only opens your own email app with a short summary pre-filled.
+* Because storage is per-browser, everyone who opens this page gets their own private setup — nothing is shared between visitors.
 * This repo is public. A checkpoint CSV and some build-reference snapshots that briefly contained real personal application data (including third-party contact info from recruiters) were removed and purged from the full git history before it was made public — see the project log for details.
 
 ## Project history
@@ -35,7 +38,7 @@ This started as a merge of two working, separately-maintained tools, built caref
 
 ## Tech notes
 
-* Single static HTML file. No build step, no backend, no dependencies beyond the Anthropic API and Google Fonts.
+* Single static HTML file. No build step, no backend, no scripts or libraries loaded from elsewhere — the only external resources are the Anthropic API (when you ask it to) and Google Fonts (stylesheets only).
 * Model: `claude-sonnet-4-6` via `POST https://api.anthropic.com/v1/messages`, called directly from the browser.
 
 Built by Chris Cannon · [chrisacannon.github.io](https://chrisacannon.github.io/)
