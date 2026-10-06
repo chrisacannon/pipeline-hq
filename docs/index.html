@@ -196,11 +196,11 @@ details.example-details summary:hover{opacity:.8}
 #tab-tracker colgroup col.c-company{width:9%}
 #tab-tracker colgroup col.c-role{width:14%}
 #tab-tracker colgroup col.c-date{width:7%}
-#tab-tracker colgroup col.c-status{width:16%}
+#tab-tracker colgroup col.c-status{width:14%}
 #tab-tracker colgroup col.c-posted{width:8%}
 #tab-tracker colgroup col.c-stated{width:9%}
 #tab-tracker colgroup col.c-next{width:13%}
-#tab-tracker colgroup col.c-notes{width:17%}
+#tab-tracker colgroup col.c-notes{width:19%}
 #tab-tracker colgroup col.c-action{width:6%}
 #tab-tracker thead tr{border-bottom:1px solid var(--tk-rule2)}
 #tab-tracker th{font-family:var(--ff-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tk-ink3);font-weight:500;padding:9px 8px;text-align:left;white-space:nowrap;background:var(--tk-th-bg)}
@@ -213,8 +213,8 @@ details.example-details summary:hover{opacity:.8}
 #tab-tracker .tk-col-salary{font-family:var(--ff-mono);font-size:11px;color:var(--tk-ink2)}
 #tab-tracker .tk-col-notes{color:var(--tk-ink3);font-size:12px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
 #tab-tracker .tk-col-notes.tk-expanded{display:block;-webkit-line-clamp:unset;overflow:visible}
-#tab-tracker .tk-col-action{white-space:nowrap}
-#tab-tracker .tk-action-btn{font-size:11px;padding:3px 9px;margin-right:4px;border-radius:3px;border:1px solid var(--tk-rule);background:transparent;color:var(--tk-ink3);cursor:pointer;transition:all .15s}
+#tab-tracker .tk-col-action{white-space:normal}
+#tab-tracker .tk-action-btn{display:block;font-size:11px;padding:3px 9px;margin:0 0 4px 0;border-radius:3px;border:1px solid var(--tk-rule);background:transparent;color:var(--tk-ink3);cursor:pointer;transition:all .15s}
 #tab-tracker .tk-action-btn:hover{border-color:var(--tk-ink3);color:var(--tk-ink)}
 #tab-tracker .tk-action-btn.tk-del:hover{border-color:var(--tk-red);color:var(--tk-red)}
 #tab-tracker .tk-empty{text-align:center;padding:3rem 1rem;color:var(--tk-ink3)}
@@ -233,6 +233,20 @@ details.example-details summary:hover{opacity:.8}
 #tab-tracker .tk-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #tab-tracker .tk-modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--tk-rule)}
 #tab-tracker .tk-next-action{font-size:11px;color:var(--tk-amber-text);background:var(--tk-amber-bg);padding:2px 7px;border-radius:3px;display:inline-block;margin-top:3px}
+#tab-tracker .tk-hint{font-size:11px;color:var(--tk-ink3);margin-top:5px;line-height:1.4}
+#tab-tracker .tk-link-btn{background:none;border:none;color:var(--tk-acc-text);font-family:var(--ff-mono);font-size:11px;cursor:pointer;margin-left:8px;padding:0;text-transform:none;letter-spacing:0}
+#tab-tracker .tk-link-btn:hover{text-decoration:underline}
+#tab-tracker .tk-step-row{display:grid;grid-template-columns:1fr 150px 28px;gap:8px;margin-bottom:6px;align-items:center}
+#tab-tracker .tk-step-del{background:none;border:1px solid var(--tk-rule);border-radius:3px;color:var(--tk-ink3);cursor:pointer;height:32px}
+#tab-tracker .tk-step-del:hover{border-color:var(--tk-red);color:var(--tk-red)}
+#tab-tracker .tk-tl-toggle{font-family:var(--ff-mono);font-size:10px;color:var(--tk-ink3);cursor:pointer;margin-top:5px;user-select:none}
+#tab-tracker .tk-tl-toggle::before{content:'▸ '}
+#tab-tracker .tk-tl-toggle:hover{color:var(--tk-ink)}
+#tab-tracker .tk-col-status.tk-tl-open .tk-tl-toggle::before{content:'▾ '}
+#tab-tracker .tk-tl{display:none;list-style:none;margin:6px 0 0 3px;padding:0 0 0 10px;border-left:1px solid var(--tk-rule2)}
+#tab-tracker .tk-col-status.tk-tl-open .tk-tl{display:block}
+#tab-tracker .tk-tl li{font-size:11px;color:var(--tk-ink2);line-height:1.4;margin-bottom:4px}
+#tab-tracker .tk-tl li span{display:block;font-family:var(--ff-mono);font-size:10px;color:var(--tk-ink3)}
 @media(max-width:600px){
   #tab-tracker .tk-field-row{grid-template-columns:1fr}
   #tab-tracker .tk-header-stats{gap:10px}
@@ -438,7 +452,7 @@ details.example-details summary:hover{opacity:.8}
       </div>
       <div class="tk-field">
         <label>Status</label>
-        <select id="tk-f-status">
+        <select id="tk-f-status" onchange="Tracker.onStatusChange()">
           <option value="applied">Applied</option>
           <option value="screen">Recruiter screen</option>
           <option value="interview">Interview</option>
@@ -452,6 +466,16 @@ details.example-details summary:hover{opacity:.8}
           <option value="pending">Pending / No response</option>
         </select>
       </div>
+    </div>
+    <div class="tk-field" id="tk-statusDateWrap" style="display:none">
+      <label>Date of this status change</label>
+      <input type="date" id="tk-f-status-date">
+      <div class="tk-hint">Recorded as a step in the timeline. Clear it to change the status without a dated step (only possible if the entry has no timeline yet).</div>
+    </div>
+    <div class="tk-field">
+      <label>Timeline <button type="button" class="tk-link-btn" onclick="Tracker.addStepRow()">+ Add step</button></label>
+      <div id="tk-stepsEditor"></div>
+      <div class="tk-hint">Dated steps after applying. Changing the status above adds one automatically; use this to back-fill or correct dates.</div>
     </div>
     <div class="tk-field-row">
       <div class="tk-field">
@@ -513,7 +537,8 @@ details.example-details summary:hover{opacity:.8}
   <div class="section-sub" style="margin-bottom:1.25rem">A job application toolkit built on the Claude API: a JD screener, resume tailor, and application tracker in one place.</div>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Step 1 — Screen:</strong> Paste a job description and get an instant match score (1-10), verdict (apply / review before applying / pass), salary recommendation, fit reasons, identified gaps, and a plain-language summary. Scoring combines general judgment with whatever guidance you've given in the Resume & rules tab.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Step 2 — Tailor (optional, score 5+):</strong> Generates a tailored resume and cover note based on your stored resume, the job description, and your custom rules. Also flags any claims worth pressure-testing for accuracy before submitting.</p>
-  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Tracker:</strong> Log every application — status, salary, next action, notes — with CSV export/import, a dark mode independent of the rest of the page, and an "Active" filter that correctly excludes rejected/withdrawn/pending entries.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Tracker:</strong> Log every application — status, salary, next action, notes — with a dated, expandable status timeline per application, CSV export/import, and an "Active" filter that excludes rejected, withdrawn, and no-response entries.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Summary:</strong> A monthly recap computed directly from your tracker. Optional "pipeline insights" appear only when a deterministic pattern shows up in your data (for example, several rejections arriving the day after applying, which usually points to automated screening); generating the written observations is a button you click, and nothing it says is ever applied to your scoring rules automatically.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem"><strong style="color:var(--t1);font-weight:500">Using this tool:</strong> Enter your Anthropic API key (get one at console.anthropic.com), then paste any job description and screen it. Each screening costs roughly $0.005-0.01. Resume + cover note generation adds another $0.01-0.02.</p>
   <div class="section-title">Setup & your data</div>
   <div class="section-sub" style="margin-bottom:1rem">Built for anyone to pick up and use with their own background.</div>
@@ -1378,11 +1403,18 @@ window.Tracker = (function(){
       const st = STATUS[a.status] || STATUS.applied;
       const dateStr = a.date ? new Date(a.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
       const nextHtml = a.next ? `<span class="tk-next-action">${esc(a.next)}</span>` : '<span style="color:var(--tk-ink3);font-size:12px">—</span>';
+      const steps = Array.isArray(a.steps) ? a.steps : [];
+      const timelineHtml = steps.length ? `
+          <div class="tk-tl-toggle" title="Show/hide timeline" onclick="this.parentElement.classList.toggle('tk-tl-open')">Timeline (${steps.length + 1})</div>
+          <ol class="tk-tl">
+            <li>Applied<span>${esc(fmtShort(a.date))}</span></li>
+            ${steps.map(s => `<li>${esc((STATUS[s.status] || STATUS.applied).label)}<span>${esc(fmtShort(s.date))}</span></li>`).join('')}
+          </ol>` : '';
       return `<tr>
         <td class="tk-col-company">${esc(a.company)}</td>
         <td class="tk-col-role">${esc(a.role)}</td>
         <td class="tk-col-date">${dateStr}</td>
-        <td><span class="tk-badge ${st.cls}">${st.label}</span></td>
+        <td class="tk-col-status"><span class="tk-badge ${st.cls}">${st.label}</span>${timelineHtml}</td>
         <td class="tk-col-salary">${esc(a.postedSalary||'—')}</td>
         <td class="tk-col-salary">${esc(a.statedSalary||'—')}</td>
         <td>${nextHtml}</td>
@@ -1395,11 +1427,81 @@ window.Tracker = (function(){
     }).join('');
   }
 
+  // ── Status timeline helpers ──────────────────────────────────────────
+  // Each entry may carry `steps`: dated transitions AFTER the application
+  // itself, e.g. [{status:'screen', date:'2026-09-18'}, ...]. The entry's
+  // `status` is always the current one (the last step's, when steps exist),
+  // so filters and stats keep working off `status` alone. Entries with no
+  // steps (everything entered before this existed) behave exactly as before.
+  function fmtShort(d) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || '');
+    return m ? `${+m[2]}/${+m[3]}/${m[1].slice(2)}` : '—';
+  }
+  function todayStr() { return new Date().toISOString().slice(0,10); }
+  function sortSteps(steps) {
+    // Array.prototype.sort is stable, so same-day steps keep entry order.
+    return steps.slice().sort((x, y) => x.date.localeCompare(y.date));
+  }
+  let modalBaseStatus = 'applied';
+
+  function stepStatusOptions(selected) {
+    return STATUS_ORDER.map(s => `<option value="${s}"${s === selected ? ' selected' : ''}>${esc(STATUS[s].label)}</option>`).join('');
+  }
+  function renderStepRows(steps) {
+    document.getElementById('tk-stepsEditor').innerHTML = steps.map(s => `
+      <div class="tk-step-row">
+        <select class="tk-step-status" onchange="Tracker.onStepsChange()">${stepStatusOptions(s.status)}</select>
+        <input type="date" class="tk-step-date" value="${esc(s.date)}" onchange="Tracker.onStepsChange()">
+        <button type="button" class="tk-step-del" title="Remove step" onclick="Tracker.removeStepRow(this)">×</button>
+      </div>`).join('');
+  }
+  function readStepRows() {
+    return Array.from(document.querySelectorAll('#tk-stepsEditor .tk-step-row')).map(r => ({
+      status: r.querySelector('.tk-step-status').value,
+      date: r.querySelector('.tk-step-date').value,
+    }));
+  }
+  function addStepRow() {
+    const steps = readStepRows();
+    steps.push({ status: 'screen', date: todayStr() });
+    renderStepRows(steps);
+    onStepsChange();
+  }
+  function removeStepRow(btn) {
+    btn.closest('.tk-step-row').remove();
+    onStepsChange();
+  }
+  function computedStatus() {
+    const dated = sortSteps(readStepRows().filter(s => s.date));
+    return dated.length ? dated[dated.length - 1].status : modalBaseStatus;
+  }
+  // Editing the timeline rows re-derives the current status, so the Status
+  // dropdown can't drift out of sync with the steps underneath it.
+  function onStepsChange() {
+    document.getElementById('tk-f-status').value = computedStatus();
+    onStatusChange();
+  }
+  function onStatusChange() {
+    const changed = document.getElementById('tk-f-status').value !== computedStatus();
+    const wrap = document.getElementById('tk-statusDateWrap');
+    wrap.style.display = changed ? 'block' : 'none';
+    if (changed && !document.getElementById('tk-f-status-date').value) {
+      document.getElementById('tk-f-status-date').value = todayStr();
+    }
+  }
+
   // ── Modal ────────────────────────────────────────────────────────────
   function openModal(id) {
     editId = id || null;
     document.getElementById('tk-modalTitle').textContent = id ? 'Edit application' : 'Add application';
     const a = id ? apps.find(x => x.id === id) : {};
+    const steps = Array.isArray(a.steps) ? a.steps : [];
+    // With steps, the baseline before them is "Applied"; legacy entries
+    // (no steps) keep whatever status they already had.
+    modalBaseStatus = (id && !steps.length) ? (a.status || 'applied') : 'applied';
+    renderStepRows(steps);
+    document.getElementById('tk-f-status-date').value = '';
+    document.getElementById('tk-statusDateWrap').style.display = 'none';
     document.getElementById('tk-f-company').value = a.company || '';
     document.getElementById('tk-f-role').value = a.role || '';
     document.getElementById('tk-f-date').value = a.date || new Date().toISOString().slice(0,10);
@@ -1408,6 +1510,7 @@ window.Tracker = (function(){
     document.getElementById('tk-f-stated-salary').value = a.statedSalary || '';
     document.getElementById('tk-f-next').value = a.next || '';
     document.getElementById('tk-f-notes').value = a.notes || '';
+    onStatusChange();
     document.getElementById('tk-overlay').classList.add('tk-open');
     setTimeout(() => document.getElementById('tk-f-company').focus(), 50);
   }
@@ -1419,12 +1522,28 @@ window.Tracker = (function(){
     const role = document.getElementById('tk-f-role').value.trim();
     if (!company || !role) { alert('Company and role are required.'); return; }
 
+    let steps = readStepRows();
+    if (steps.some(s => !s.date)) { alert('Each timeline step needs a date.'); return; }
+    steps = sortSteps(steps);
+    const chosen = document.getElementById('tk-f-status').value;
+    if (chosen !== computedStatus()) {
+      const changeDate = document.getElementById('tk-f-status-date').value;
+      if (changeDate) {
+        steps = sortSteps([...steps, { status: chosen, date: changeDate }]);
+      } else if (steps.length) {
+        alert('Add the date of this status change, or remove the timeline steps first.');
+        return;
+      }
+    }
+    const status = steps.length ? steps[steps.length - 1].status : chosen;
+
     const data = {
       id: editId || genId(),
       company,
       role,
       date: document.getElementById('tk-f-date').value,
-      status: document.getElementById('tk-f-status').value,
+      status,
+      steps,
       postedSalary: document.getElementById('tk-f-posted-salary').value.trim(),
       statedSalary: document.getElementById('tk-f-stated-salary').value.trim(),
       next: document.getElementById('tk-f-next').value.trim(),
@@ -1449,13 +1568,31 @@ window.Tracker = (function(){
     save(); refresh();
   }
 
+  // Timeline <-> one CSV cell: "Recruiter screen 2026-09-18; Interview 2026-09-24".
+  // Older 8-column exports have no such column and still import fine.
+  function serializeSteps(steps) {
+    return (Array.isArray(steps) ? steps : [])
+      .map(s => `${(STATUS[s.status] || STATUS.applied).label} ${s.date}`)
+      .join('; ');
+  }
+  function parseSteps(cell) {
+    const out = [];
+    String(cell || '').split(';').forEach(part => {
+      const m = /^\s*(.+?)\s+(\d{4}-\d{2}-\d{2})\s*$/.exec(part);
+      if (!m) return;
+      const found = Object.entries(STATUS).find(([, v]) => v.label === m[1]);
+      if (found) out.push({ status: found[0], date: m[2] });
+    });
+    return sortSteps(out);
+  }
+
   // ── Export ───────────────────────────────────────────────────────────
   function exportCSV() {
     if (!apps.length) { alert('No applications to export.'); return; }
-    const headers = ['Company','Role','Date Applied','Status','Posted Salary Range','Stated Salary','Next Action','Notes'];
+    const headers = ['Company','Role','Date Applied','Status','Posted Salary Range','Stated Salary','Next Action','Notes','Status Timeline'];
     const rows = apps.map(a => [
       a.company, a.role, a.date, STATUS[a.status]?.label || a.status,
-      a.postedSalary, a.statedSalary, a.next, a.notes
+      a.postedSalary, a.statedSalary, a.next, a.notes, serializeSteps(a.steps)
     ].map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(','));
     const csv = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csv], {type:'text/csv'});
@@ -1515,6 +1652,7 @@ window.Tracker = (function(){
           stated: header.indexOf('Stated Salary'),
           next: header.indexOf('Next Action'),
           notes: header.indexOf('Notes'),
+          timeline: header.indexOf('Status Timeline'),
         };
         if (idx.company === -1 || idx.role === -1) {
           alert('CSV header not recognized — expected the tracker\'s own export format (Company, Role, Date Applied, Status, ...).');
@@ -1531,6 +1669,7 @@ window.Tracker = (function(){
           statedSalary: r[idx.stated] || '',
           next: r[idx.next] || '',
           notes: r[idx.notes] || '',
+          steps: idx.timeline === -1 ? [] : parseSteps(r[idx.timeline]),
         }));
         const msg = `Import ${imported.length} application${imported.length===1?'':'s'} from this CSV? This replaces the ${apps.length} entr${apps.length===1?'y':'ies'} currently in the tracker.`;
         if (!confirm(msg)) return;
@@ -1559,13 +1698,18 @@ window.Tracker = (function(){
   // Returns copies (with a resolved statusLabel) so callers can't mutate
   // the tracker's own state.
   function getApps() {
-    return apps.map(a => ({ ...a, statusLabel: (STATUS[a.status] || STATUS.applied).label }));
+    return apps.map(a => ({
+      ...a,
+      steps: (Array.isArray(a.steps) ? a.steps : []).map(s => ({ ...s })),
+      statusLabel: (STATUS[a.status] || STATUS.applied).label,
+    }));
   }
 
   return {
     init, refresh,
     openModal, closeModal, handleOverlayClick, saveApplication, editApp, deleteApp,
     exportCSV, handleImportFile, renderTable, getApps,
+    onStatusChange, onStepsChange, addStepRow, removeStepRow,
   };
 })();
 
@@ -1663,7 +1807,20 @@ window.Summary = (function(){
   // Open-ended by design — add more entries to TRIGGERS as patterns come
   // up. Each one only looks at real tracker data; none of them call the
   // API themselves, they just decide whether Generate should be offered.
+  // Each trigger: check(apps) -> array of { label, entries }; buildPrompt(group)
+  // -> the prompt used only if the user clicks Generate on that group.
   const NO_ADVANCE_STATUSES = ['rejected_app', 'pending'];
+  const QUICK_REJECTION_MAX_DAYS = 1;   // same or next day (dates are day-level)
+  const QUICK_REJECTION_MIN_COUNT = 3;
+  const QUICK_REJECTION_STATUSES = ['rejected_app', 'rejected_unspecified'];
+
+  function daysBetween(from, to) {
+    const re = /^(\d{4})-(\d{2})-(\d{2})$/;
+    const a = re.exec(from || ''), b = re.exec(to || '');
+    if (!a || !b) return null;
+    return Math.round((Date.UTC(+b[1], +b[2]-1, +b[3]) - Date.UTC(+a[1], +a[2]-1, +a[3])) / 86400000);
+  }
+
   const TRIGGERS = [
     {
       id: 'same-company-high-score-no-advance',
@@ -1677,9 +1834,66 @@ window.Summary = (function(){
           if (!NO_ADVANCE_STATUSES.includes(a.status)) return;
           const key = (a.company||'').trim().toLowerCase();
           if (!key) return;
-          (groups[key] ||= { company: a.company, entries: [] }).entries.push({ ...a, score });
+          (groups[key] ||= { label: a.company, entries: [] }).entries.push({ ...a, score });
         });
         return Object.values(groups).filter(g => g.entries.length >= 5);
+      },
+      buildPrompt(t) {
+        const entriesText = t.entries.map(e =>
+          `- ${e.role || '(role not recorded)'} — self-scored ${e.score}/10, status: ${e.statusLabel}\n  Notes: ${(e.notes||'').trim()}`
+        ).join('\n\n');
+        return `You are reviewing a job candidate's application outcomes to look for POSSIBLE scoring-calibration issues — cases where the candidate's self-assessed fit score didn't match what actually happened. This is advisory only: the candidate reviews your observations manually and decides whether to change anything themselves. You are NOT rewriting any rules.
+
+CANDIDATE'S CURRENT SCORING RULES:
+${typeof getRules === 'function' ? getRules() : '(not available)'}
+
+FLAGGED PATTERN: ${t.description}. Company: ${t.label}.
+
+${entriesText}
+
+Based on these notes, describe any patterns worth the candidate's attention — a specific requirement or gap that keeps appearing, a mismatch between self-assessed fit and real outcomes, or scope/seniority signals that might be miscalibrated. Be conservative: only note genuine, well-supported patterns visible across multiple entries here, not speculation from a single case. Do not propose specific rule text — just describe what you're observing and why it might be worth a closer look.
+
+Respond with ONLY a valid JSON object, no markdown fences:
+{
+  "observations": ["observation 1", "observation 2"],
+  "caveat": "<one sentence reminding the candidate this is a pattern in a small sample, not a certainty>"
+}`;
+      },
+    },
+    {
+      id: 'quick-rejection-pattern',
+      category: 'Automated screening',
+      description: `Rejected the same or next day after applying, ${QUICK_REJECTION_MIN_COUNT} or more times — almost always automated (ATS/AI) screening, not a person reading the application`,
+      // Needs a dated rejection step on the entry's timeline; entries without
+      // one (everything logged before timelines existed) are simply not counted.
+      check(apps) {
+        const entries = [];
+        apps.forEach(a => {
+          const step = (a.steps || []).find(s => QUICK_REJECTION_STATUSES.includes(s.status));
+          if (!step) return;
+          const days = daysBetween(a.date, step.date);
+          if (days === null || days < 0 || days > QUICK_REJECTION_MAX_DAYS) return;
+          entries.push({ ...a, rejectedOn: step.date, days });
+        });
+        return entries.length >= QUICK_REJECTION_MIN_COUNT
+          ? [{ label: 'Across your applications', entries }]
+          : [];
+      },
+      buildPrompt(t) {
+        const entriesText = t.entries.map(e =>
+          `- ${e.company} — ${e.role || '(role not recorded)'} — applied ${e.date}, rejected ${e.rejectedOn} (${e.days === 0 ? 'same day' : 'next day'})\n  Notes: ${(e.notes||'').trim()}`
+        ).join('\n\n');
+        return `You are reviewing a job candidate's application outcomes. Each application below was rejected the same or next day after submission, which almost always means automated screening (an ATS and/or AI filter) rather than a person reading the application. The candidate already treats these as automated-screening rejections; your job is to help narrow down WHICH part of the automated process may be responsible, not to question whether it was automated.
+
+${entriesText}
+
+Look across these notes for clues about the mechanism — for example: application-form knockout questions (years of experience, location, work authorization, salary expectations) whose answers may not have matched the posting's stated requirements; hard requirements that the candidate's answers or resume may not have matched on a literal/keyword basis; role-level or seniority mismatches; or anything shared across these roles (same kind of employer, same posting characteristics). Be conservative: only note things the notes actually support across more than one entry, say plainly when the notes don't contain enough to tell, and do not speculate beyond them. This is advisory only; the candidate decides what to change. Do not rewrite any scoring rules or resume text.
+
+Respond with ONLY a valid JSON object, no markdown fences:
+{
+  "observations": ["observation 1", "observation 2"],
+  "caveat": "<one sentence on what the notes can and cannot tell the candidate about the mechanism>"
+}`;
       },
     },
   ];
@@ -1704,7 +1918,7 @@ window.Summary = (function(){
     block.innerHTML = triggers.map((t, i) => `
       <div class="sm-trigger-box">
         ${t.category ? `<div style="font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:4px">${esc(t.category)}</div>` : ''}
-        <div style="color:var(--t1);margin-bottom:6px"><strong>${esc(t.company)}</strong> — ${esc(t.description)} (${t.entries.length} matching entries)</div>
+        <div style="color:var(--t1);margin-bottom:6px"><strong>${esc(t.label)}</strong> — ${esc(t.description)} (${t.entries.length} matching entries)</div>
         <button class="btn sm" onclick="Summary.generateInsights(${i})">Generate insights →</button>
       </div>
     `).join('');
@@ -1715,34 +1929,16 @@ window.Summary = (function(){
     const t = lastTriggers[triggerIndex];
     if (!t) return;
     const out = document.getElementById('sm-insightsOutput');
-    out.innerHTML = `<div class="loading"><div class="spin"></div>Reviewing ${t.entries.length} applications at ${esc(t.company)}…</div>`;
+    out.innerHTML = `<div class="loading"><div class="spin"></div>Reviewing ${t.entries.length} applications (${esc(t.label)})…</div>`;
 
-    const entriesText = t.entries.map(e =>
-      `- ${e.role || '(role not recorded)'} — self-scored ${e.score}/10, status: ${e.statusLabel}\n  Notes: ${(e.notes||'').trim()}`
-    ).join('\n\n');
-
-    const prompt = `You are reviewing a job candidate's application outcomes to look for POSSIBLE scoring-calibration issues — cases where the candidate's self-assessed fit score didn't match what actually happened. This is advisory only: the candidate reviews your observations manually and decides whether to change anything themselves. You are NOT rewriting any rules.
-
-CANDIDATE'S CURRENT SCORING RULES:
-${typeof getRules === 'function' ? getRules() : '(not available)'}
-
-FLAGGED PATTERN: ${t.description}. Company: ${t.company}.
-
-${entriesText}
-
-Based on these notes, describe any patterns worth the candidate's attention — a specific requirement or gap that keeps appearing, a mismatch between self-assessed fit and real outcomes, or scope/seniority signals that might be miscalibrated. Be conservative: only note genuine, well-supported patterns visible across multiple entries here, not speculation from a single case. Do not propose specific rule text — just describe what you're observing and why it might be worth a closer look.
-
-Respond with ONLY a valid JSON object, no markdown fences:
-{
-  "observations": ["observation 1", "observation 2"],
-  "caveat": "<one sentence reminding the candidate this is a pattern in a small sample, not a certainty>"
-}`;
+    const def = TRIGGERS.find(x => x.id === t.triggerId);
+    const prompt = def.buildPrompt(t);
 
     try {
       const raw = await callClaude(prompt, 700);
       const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
       const result = JSON.parse(clean);
-      lastInsights = { company: t.company, generatedAt: new Date().toISOString(), ...result };
+      lastInsights = { label: t.label, category: t.category, generatedAt: new Date().toISOString(), ...result };
       renderInsights(lastInsights);
     } catch (e) {
       out.innerHTML = `<div class="error-box">Error: ${esc(e.message)}</div>`;
@@ -1754,7 +1950,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
     const items = (result.observations||[]).map(o => `<li>${esc(o)}</li>`).join('');
     out.innerHTML = `
       <div class="sm-insight-box">
-        <div style="font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">AI-generated observations — ${esc(result.company)} — review before acting, nothing here is applied automatically</div>
+        <div style="font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">AI-generated observations — ${esc(result.category || 'Pipeline insight')}: ${esc(result.label)} — review before acting, nothing here is applied automatically</div>
         <ul>${items}</ul>
         ${result.caveat ? `<div class="sm-caveat">${esc(result.caveat)}</div>` : ''}
       </div>
@@ -1777,7 +1973,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
       md += `No applications recorded for this month.\n`;
     }
     if (lastInsights) {
-      md += `\n## AI-generated insights — ${lastInsights.company}\n\n_Advisory only, generated ${new Date(lastInsights.generatedAt).toLocaleString()}. Not applied automatically to scoring rules._\n\n`;
+      md += `\n## AI-generated insights — ${lastInsights.category || 'Pipeline insight'}: ${lastInsights.label}\n\n_Advisory only, generated ${new Date(lastInsights.generatedAt).toLocaleString()}. Not applied automatically to scoring rules._\n\n`;
       (lastInsights.observations||[]).forEach(o => { md += `- ${o}\n`; });
       if (lastInsights.caveat) md += `\n> ${lastInsights.caveat}\n`;
     }
@@ -1809,7 +2005,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
       ? `${stats.total} applications sent, ${stats.screensPlus} reached screen+, ${stats.offers} offers.\n\n`
       : `No applications recorded this month.\n\n`;
     body += lastInsights
-      ? `AI insights were generated for ${lastInsights.company} — export the Markdown version and attach it here for the full text.`
+      ? `AI insights were generated (${lastInsights.label}) — export the Markdown version and attach it here for the full text.`
       : `Export the Markdown version from the Summary tab and attach it here for full detail.`;
     link.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }

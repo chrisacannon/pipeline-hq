@@ -1,6 +1,22 @@
 # Current Session
 
-**Stage:** Cutover — live. All three build stages are complete; the app is now published and the repo is public.
+**Stage:** Post-launch iteration (v2 work). The app is live and the repo is public; this session added status timelines, a second insight trigger, and a public-facing cleanup pass.
+
+**Footer and naming cleanup:** removed the dev-style build/version lines from the page footer (the project log is the real changelog). The Summary tab's insights section is now "Pipeline insights", and each trigger carries a category tag (existing trigger: "Scoring calibration"; new one: "Automated screening") so non-scoring patterns aren't mislabeled.
+
+**Status timelines (new):** each application can carry dated steps after applying (e.g. Recruiter screen 9/18/26, Interview 9/24/26). The current `status` is always the last step's, so filters/stats/Summary are unchanged; entries logged before this existed have no steps and behave exactly as before. UI: a "Timeline (n)" toggle under the status badge expands a vertical list (collapsed by default, like notes); the edit modal has a "Date of this status change" field (appears when the status dropdown changes) and a timeline editor with "+ Add step" for back-filling/correcting. CSV gained a ninth "Status Timeline" column (`Recruiter screen 2026-09-18; Interview 2026-09-24`); older 8-column files still import, and a round-trip export→import was verified identical. No new table column was needed.
+
+**Second insight trigger — quick rejections:** fires when 3+ applications have a dated `rejected_app`/`rejected_unspecified` step the same or next day after the applied date (dates are day-level, so "same or next day" is the real threshold). Chris's read, adopted in the framing: quick rejections on freshly listed roles are almost always automated (ATS/AI) screening, so the insight treats that as given and instead asks which mechanism the notes point to (knockout form answers such as years of experience, literal keyword/requirement mismatch, level mismatch, or something shared across the roles). Note the tracker has no posting-age field, so "freshly listed" isn't visible to the trigger; anything like "posted 2 days ago" has to go in notes. The real tracker's existing entries have no dated steps, so this trigger sees nothing until timelines accrue. Each trigger now owns its own prompt (`buildPrompt`), and groups carry a `label` instead of assuming one company.
+
+**Root cause of the lingering table side-scroll found and fixed:** it wasn't the overall width — the Edit/Delete buttons in the narrow Action column were `nowrap` and couldn't shrink, pushing the table past its container whenever the window was under ~1900px (the 1px overflow measured earlier at 1920px was the same thing). Buttons now stack; measured 0px overflow at 1280, 1500, and 1920px with timelines expanded. Status column trimmed 16%→14%, notes 17%→19%.
+
+**Also:** About tab no longer advertises the removed dark-mode toggle and now describes the timeline and Summary tab; two modal placeholders that were borrowed from a real employer's name and role title were replaced with neutral ones.
+
+**Open / pending Chris's review:** synthetic example resume and rule answers (draft written, names being revised before it's wired in); whether to add a demo mode vs. funded free uses; whether to add a profile export/import for the real resume and rules. Reminder that Chris's real resume and rules still exist in the old `job-description-screener` repo/site and in this repo's earlier history, so anonymizing the current version alone doesn't remove them.
+
+---
+
+**Stage (earlier this month):** Cutover — live. All three build stages are complete; the app is now published and the repo is public.
 
 **Live at https://chrisacannon.github.io/pipeline-hq/** — GitHub Pages publishing from `main` branch, `/docs` folder. Verified directly (not assumed): the app loads and works at the root URL, and `README.md`/`pipeline-hq-project-log.md` both 404 when requested at that URL, confirming Pages only serves what's actually inside `/docs` regardless of what else is public in the repo.
 
