@@ -4,6 +4,8 @@
 
 **Working rule for this repo:** stage files by name, never `git add -A`; `*.csv` is gitignored, and exports of real tracker data are kept outside the repo folder.
 
+**History note (Oct 2026):** this repository's commit history was rewritten once to remove superseded example content; the files at the tip are identical before and after.
+
 **Footer and naming cleanup:** removed the dev-style build/version lines from the page footer (the project log is the real changelog). The Summary tab's insights section is now "Pipeline insights", and each trigger carries a category tag (existing trigger: "Scoring calibration"; new one: "Automated screening") so non-scoring patterns aren't mislabeled.
 
 **Status timelines (new):** each application can carry dated steps after applying (e.g. Recruiter screen 9/18/26, Interview 9/24/26). The current `status` is always the last step's, so filters/stats/Summary are unchanged; entries logged before this existed have no steps and behave exactly as before. UI: a "Timeline (n)" toggle under the status badge expands a vertical list (collapsed by default, like notes); the edit modal has a "Date of this status change" field (appears when the status dropdown changes) and a timeline editor with "+ Add step" for back-filling/correcting. CSV gained a ninth "Status Timeline" column (`Recruiter screen 2026-09-18; Interview 2026-09-24`); older 8-column files still import, and a round-trip export→import was verified identical. No new table column was needed.
