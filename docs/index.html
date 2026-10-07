@@ -319,7 +319,7 @@ details.example-details summary:hover{opacity:.8}
     <button class="btn primary" onclick="finishSetup()">Save & start screening →</button>
     <button class="btn" onclick="document.getElementById('profileImportFile').click()">Restore from backup</button>
   </div>
-  <div class="config-note" style="margin-top:8px">Already exported a backup of your resume and rules? "Restore from backup" loads it and skips the questions above.</div>
+  <div class="config-note" style="margin-top:8px">Already exported a backup? "Restore from backup" loads your resume, rules, and screening history and skips the questions above.</div>
 </div>
 
 <!-- MAIN APP -->
@@ -362,6 +362,13 @@ details.example-details summary:hover{opacity:.8}
 
 <!-- SCREEN TAB -->
 <div id="tab-screen">
+  <div id="legacyHistoryNotice" style="display:none;background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd);padding:12px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--t2);line-height:1.6">
+    <span id="legacyHistoryText"></span>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn sm primary" onclick="importLegacyHistory()">Add them</button>
+      <button class="btn sm" onclick="dismissLegacyHistory()">No thanks</button>
+    </div>
+  </div>
   <div class="field">
     <label class="sec">Job description</label>
     <textarea id="jdInput" rows="12" placeholder="Paste the full job description here — include title, responsibilities, requirements, and salary range if listed…"></textarea>
@@ -403,7 +410,7 @@ details.example-details summary:hover{opacity:.8}
     <button class="btn" onclick="document.getElementById('profileImportFile').click()">Import backup</button>
     <input type="file" id="profileImportFile" accept=".json,application/json" style="display:none" onchange="importProfile(event)">
   </div>
-  <div class="config-note" style="margin-top:8px">A backup is one JSON file holding your resume and rule answers — it contains your resume, so keep it somewhere private. Importing replaces what's currently saved here. Tracker entries have their own CSV export in the Tracker tab.</div>
+  <div class="config-note" style="margin-top:8px">A backup is one JSON file holding your resume, your rule answers, and your screening history (company, title, score, verdict, and date for each screen — never job-description text). It contains your resume and the companies you've screened, so keep it somewhere private. Importing replaces your saved resume and rules; the screening history in a backup is merged in, so nothing already saved is removed. Tracker entries have their own CSV export in the Tracker tab.</div>
   <div id="saveMsg" style="font-size:12px;color:var(--green);margin-top:8px;font-family:var(--ff-mono);display:none">Saved to session.</div>
   <div class="config-note" style="margin-top:10px" id="storageNote">Saved to this browser (localStorage) — it'll be here next time you visit this page, on this device and browser only. "Start over" clears it and returns you to setup.</div>
 </div>
@@ -571,12 +578,12 @@ details.example-details summary:hover{opacity:.8}
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem"><strong style="color:var(--t1);font-weight:500">Using this tool:</strong> Enter your Anthropic API key (get one at console.anthropic.com), then paste any job description and screen it. Each screening costs roughly $0.005-0.01. Resume + cover note generation adds another $0.01-0.02.</p>
   <div class="section-title">Setup</div>
   <div class="section-sub" style="margin-bottom:1rem">Built for anyone to pick up and use with their own background.</div>
-  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem">The first time you open this page, you'll paste in your resume and answer a short set of optional questions about how you'd like roles scored. Both fields start blank — the "See examples" links show a fictional sample resume and sample answers, and they only land in your own fields if you choose "Load example answers." In the Resume & rules tab, "Export backup" saves your resume and rules as a file you can restore later, and "Start over" clears your saved data so you can run setup again.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem">The first time you open this page, you'll paste in your resume and answer a short set of optional questions about how you'd like roles scored. Both fields start blank — the "See examples" links show a fictional sample resume and sample answers, and they only land in your own fields if you choose "Load example answers." In the Resume & rules tab, "Export backup" saves your resume, rules, and screening history as a file you can restore later, and "Start over" clears your saved data so you can run setup again.</p>
   <div class="section-title">Privacy — what happens to your data</div>
   <div class="section-sub" style="margin-bottom:1rem">Short version: nothing is collected. Here is everything this page does with your information, including the parts that aren't obvious.</div>
   <ul style="font-size:13px;color:var(--t2);line-height:1.7;margin:0 0 1.25rem 18px">
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">No collection.</strong> No accounts, analytics, cookies, tracking scripts, or server of its own. Nobody running this tool receives your resume, notes, or tracker.</li>
-    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Where your data lives.</strong> Your resume, rule answers, tracker entries, and screening history are saved in this browser's local storage for this site, on this device only. Clearing your browser's site data deletes them, so use Export backup (resume &amp; rules) and Export CSV (tracker) to keep copies.</li>
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Where your data lives.</strong> Your resume, rule answers, tracker entries, and screening history are saved in this browser's local storage for this site, on this device only. Clearing your browser's site data deletes them, so use Export backup (resume, rules, and screening history) and Export CSV (tracker) to keep copies. If you used the earlier standalone version of this tool in this browser, it will offer once to add that version's screening history; it only reads it, never changes or deletes it, and only if you say yes.</li>
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">What leaves your browser, and only when you click.</strong> Screen, Generate (tailored materials), and Generate insights send text directly from your browser to Anthropic's API using your own key: your resume, the job description, and your scoring rules, and for insights, the notes from the tracker entries involved. Anthropic's terms and privacy policy govern what happens to it there. This page never stores your key; it exists only in the page until you reload or close it.</li>
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Two other network requests you don't control.</strong> The page loads its fonts from Google Fonts when it opens, so Google can see your IP address and browser details, as with any site that uses it. And the page is served by GitHub Pages, which, like any web host, may keep ordinary server logs (such as IP addresses) that this tool has no access to.</li>
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Files you export</strong> (CSV, JSON backups, Markdown summaries) are saved to your own device; nothing is uploaded. Backups contain your resume and tracker notes, so store them somewhere private.</li>
@@ -1150,6 +1157,7 @@ function initApp() {
     document.getElementById('mainApp').style.display = 'none';
   }
   applyDemoUI();
+  checkLegacyHistory();
 }
 
 function finishSetup() {
@@ -1244,19 +1252,24 @@ function loadExample() {
   setTimeout(() => { msg.style.display = 'none'; msg.textContent = 'Saved to this browser.'; }, 3000);
 }
 
-// ── Resume & rules backup (JSON file on the user's own device) ─────────
-// Export reads what's in the fields now; import validates the file, replaces
-// what's saved, and saves it immediately. Nothing here touches the network.
+// ── Profile backup (JSON file on the user's own device) ────────────────
+// Holds the resume, the rule answers, and the screening history (company,
+// title, score, verdict, date — never job-description text). Export reads
+// what's in the fields now; import validates the file, REPLACES the resume
+// and rules, and MERGES the history (adds only, never removes). Version 1
+// backups, which have no history, still restore and leave history alone.
+// Nothing here touches the network.
 const PROFILE_BACKUP_TYPE = 'pipeline-hq-profile';
 
 function exportProfile() {
   const resume = document.getElementById('resumeText').value;
   const rules = getRuleAnswers('config');
-  if (!resume.trim() && Object.values(rules).every(v => !v)) {
-    alert('Nothing to export yet — add a resume or some rule answers first.');
+  const screenHistory = loadScreenHistory();
+  if (!resume.trim() && Object.values(rules).every(v => !v) && !(Array.isArray(screenHistory) && screenHistory.length)) {
+    alert('Nothing to export yet — add a resume, some rule answers, or screen a role first.');
     return;
   }
-  const payload = { type: PROFILE_BACKUP_TYPE, version: 1, exportedAt: new Date().toISOString(), resume, rules };
+  const payload = { type: PROFILE_BACKUP_TYPE, version: 2, exportedAt: new Date().toISOString(), resume, rules, screenHistory: Array.isArray(screenHistory) ? screenHistory : [] };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1279,20 +1292,24 @@ function importProfile(evt) {
       const answers = {};
       RULE_QUESTIONS.forEach(q => { answers[q.id] = typeof p.rules[q.id] === 'string' ? p.rules[q.id] : ''; });
 
+      const incomingHistory = Array.isArray(p.screenHistory) ? p.screenHistory : null;
       const hasSaved = sessionResume.trim() || Object.values(sessionRuleAnswers).some(v => v && v.trim());
       const when = p.exportedAt ? ` (exported ${new Date(p.exportedAt).toLocaleDateString()})` : '';
-      if (hasSaved && !confirm(`Replace your saved resume and rule answers with this backup${when}? This can't be undone — export a backup of your current ones first if you might want them.`)) return;
+      const histNote = incomingHistory ? ' Screening history is merged in, not replaced — nothing already in it is removed.' : '';
+      if (hasSaved && !confirm(`Replace your saved resume and rule answers with this backup${when}? This can't be undone — export a backup of your current ones first if you might want them.${histNote}`)) return;
 
       sessionResume = p.resume;
       sessionRuleAnswers = answers;
       const saved = storageSet(STORAGE_KEY_RESUME, sessionResume) && storageSet(STORAGE_KEY_RULES, JSON.stringify(answers));
+      const historyAdded = incomingHistory ? mergeScreenHistory(incomingHistory) : null;
       document.getElementById('resumeText').value = sessionResume;
       setRuleAnswers('config', answers);
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       showTab('config');
       const msg = document.getElementById('saveMsg');
-      msg.textContent = saved ? 'Backup restored and saved to this browser.' : 'Backup restored for this session only (browser storage unavailable).';
+      const histText = historyAdded === null ? '' : ` ${historyAdded} screening-history entr${historyAdded === 1 ? 'y' : 'ies'} added.`;
+      msg.textContent = (saved ? 'Backup restored and saved to this browser.' : 'Backup restored for this session only (browser storage unavailable).') + histText;
       msg.style.display = 'block';
       setTimeout(() => { msg.style.display = 'none'; msg.textContent = 'Saved to this browser.'; }, 4000);
     } catch (e) {
@@ -1442,6 +1459,85 @@ function findScreenHistory(company) {
   });
 }
 
+// ── Screening-history backup / merge helpers ───────────────────────────
+// Anything arriving from outside (a backup file, the earlier tool's storage)
+// is coerced to the exact shape saveScreenHistory writes; entries that can't
+// be made sensible are dropped. Merging only ever ADDS entries — it never
+// removes or edits what's already saved.
+function normalizeHistoryEntries(list) {
+  const out = [];
+  (Array.isArray(list) ? list : []).forEach(e => {
+    if (!e || typeof e !== 'object') return;
+    const company = String(e.company || '').trim().slice(0, 200);
+    const score = (e.score === null || e.score === '' || e.score === undefined) ? NaN : Number(e.score);
+    if (!company || !Number.isFinite(score) || score < 0 || score > 10) return;
+    const verdict = ['apply', 'review', 'pass'].includes(e.verdict) ? e.verdict : (score >= 7 ? 'apply' : score >= 5 ? 'review' : 'pass');
+    out.push({
+      company,
+      title: String(e.title || '').trim().slice(0, 200) || '(untitled)',
+      score,
+      verdict,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') ? e.date : ''
+    });
+  });
+  return out;
+}
+function historyEntryKey(e) {
+  return [e.company.toLowerCase(), e.title.toLowerCase(), e.date, e.score].join('|');
+}
+// Returns how many entries were actually new.
+function mergeScreenHistory(incoming) {
+  let current = loadScreenHistory();
+  if (!Array.isArray(current)) current = [];
+  const seen = new Set(normalizeHistoryEntries(current).map(historyEntryKey));
+  const added = [];
+  normalizeHistoryEntries(incoming).forEach(e => {
+    const k = historyEntryKey(e);
+    if (!seen.has(k)) { seen.add(k); added.push(e); }
+  });
+  if (!added.length) return 0;
+  const combined = current.concat(added)
+    .map((e, i) => ({ e, i }))
+    .sort((a, b) => ((a.e.date || '').localeCompare(b.e.date || '')) || (a.i - b.i))
+    .map(x => x.e)
+    .slice(-200);
+  try { localStorage.setItem(SCREEN_HISTORY_KEY, JSON.stringify(combined)); } catch (e) { return 0; }
+  return added.length;
+}
+
+// ── One-time offer to bring over the earlier standalone screener's history ──
+// That tool kept its history under a different key in the same browser
+// storage. We only ever READ it, never change or delete it, and only after
+// the user says yes. Not offered in demo mode.
+const LEGACY_HISTORY_KEY = 'jd_screen_history_v1';
+const LEGACY_PROMPTED_KEY = KEY_PREFIX + 'legacy_history_prompted_v1';
+function readLegacyHistory() {
+  try { return normalizeHistoryEntries(JSON.parse(localStorage.getItem(LEGACY_HISTORY_KEY))); }
+  catch (e) { return []; }
+}
+function checkLegacyHistory() {
+  const box = document.getElementById('legacyHistoryNotice');
+  if (!box || DEMO || storageGet(LEGACY_PROMPTED_KEY)) return;
+  const seen = new Set(normalizeHistoryEntries(loadScreenHistory()).map(historyEntryKey));
+  const fresh = readLegacyHistory().filter(e => !seen.has(historyEntryKey(e)));
+  if (!fresh.length) return;
+  document.getElementById('legacyHistoryText').textContent =
+    `This browser has ${fresh.length} screen${fresh.length === 1 ? '' : 's'} saved by the earlier version of this tool. Add ${fresh.length === 1 ? 'it' : 'them'} to your screening history so repeat companies get flagged? Your old copy is left exactly as it is.`;
+  box.style.display = 'block';
+}
+function importLegacyHistory() {
+  const added = mergeScreenHistory(readLegacyHistory());
+  storageSet(LEGACY_PROMPTED_KEY, '1');
+  const text = document.getElementById('legacyHistoryText');
+  text.textContent = `Added ${added} screen${added === 1 ? '' : 's'} to your screening history.`;
+  document.querySelector('#legacyHistoryNotice .btn-row').style.display = 'none';
+  setTimeout(() => { document.getElementById('legacyHistoryNotice').style.display = 'none'; }, 3500);
+}
+function dismissLegacyHistory() {
+  storageSet(LEGACY_PROMPTED_KEY, '1');
+  document.getElementById('legacyHistoryNotice').style.display = 'none';
+}
+
 // ── Tracker cross-reference (deterministic, read-only) ──────────────────
 // Same fuzzy company-name match as the screening-history banner above,
 // but against the Tracker tab's real application records — did I actually
@@ -1470,7 +1566,7 @@ function renderScreen(r, priorMatches, trackerMatches) {
 <div style="background:var(--amber-bg,#f5edda);border:1px solid var(--amber,#7a5c1e);border-radius:var(--rmd);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t1)">
   <strong>You've screened ${priorMatches.length} role${priorMatches.length>1?'s':''} at ${esc(r.company||'this company')} before:</strong>
   <ul style="margin:6px 0 0 18px;padding:0">
-    ${priorMatches.map(h => `<li>${esc(h.title)} — scored ${h.score}/10 (${esc(h.verdict)}) on ${esc(h.date)}</li>`).join('')}
+    ${priorMatches.map(h => `<li>${esc(h.title)} — scored ${h.score}/10 (${esc(h.verdict)}) on ${esc(h.date || 'an unknown date')}</li>`).join('')}
   </ul>
 </div>` : '';
 
