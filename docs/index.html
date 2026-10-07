@@ -289,6 +289,11 @@ details.example-details summary:hover{opacity:.8}
 <div id="welcomeScreen" style="display:none">
   <div class="section-title">Welcome — let's set up your profile</div>
   <div class="section-sub">This tool screens job postings against your resume and drafts tailored applications. Nothing is collected: everything you enter is saved only in this browser, and the only thing that leaves it is what you choose to send to Anthropic's API (with your own key) when you screen a role, generate tailored materials, or generate insights. The full privacy details are on the About tab once you're set up.</div>
+  <div id="welcomeDemoEntry" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 1.5rem;padding:10px 14px;background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--rmd)">
+    <span class="config-note" style="margin:0">Just looking around?</span>
+    <button class="btn sm" onclick="enterDemo()">Try the demo</button>
+    <span class="config-note" style="margin:0">Sample data and pre-written output — no API key or setup needed.</span>
+  </div>
 
   <div class="field">
     <label class="sec">Your resume</label>
@@ -322,13 +327,28 @@ details.example-details summary:hover{opacity:.8}
 
 <!-- API Key -->
 <div class="key-section">
-  <label class="sec">Anthropic API key</label>
-  <div class="key-row">
-    <input type="password" id="apiKey" placeholder="sk-ant-..." style="flex:1;min-width:200px" oninput="checkKey()">
-    <button class="btn sm" onclick="toggleKeyVis()" id="keyToggle">show</button>
+  <div id="keyBlock">
+    <label class="sec">Anthropic API key</label>
+    <div class="key-row">
+      <input type="password" id="apiKey" placeholder="sk-ant-..." style="flex:1;min-width:200px" oninput="checkKey()">
+      <button class="btn sm" onclick="toggleKeyVis()" id="keyToggle">show</button>
+    </div>
+    <div class="key-status no" id="keyStatus">No key entered — required to use this tool</div>
+    <div class="config-note" style="margin-top:6px">Your key is used only in your browser to call the Anthropic API directly. It is never stored, and you'll re-enter it each visit. Get a key at console.anthropic.com.</div>
+    <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--bd);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="config-note" style="margin:0">No API key handy?</span>
+      <button class="btn sm" onclick="enterDemo()">Try the demo</button>
+      <span class="config-note" style="margin:0">Sample data and pre-written output — no key needed, and nothing touches your own profile.</span>
+    </div>
   </div>
-  <div class="key-status no" id="keyStatus">No key entered — required to use this tool</div>
-  <div class="config-note" style="margin-top:6px">Your key is used only in your browser to call the Anthropic API directly. It is never stored, and you'll re-enter it each visit. Get a key at console.anthropic.com.</div>
+  <div id="demoBanner" style="display:none">
+    <label class="sec" style="color:var(--acc)">Demo mode</label>
+    <div style="font-size:12.5px;color:var(--t1);line-height:1.6;margin-bottom:10px">Everything here is sample data for a fictional candidate. Nothing you do touches a real profile or tracker, and Screen, Tailor, and Generate insights return pre-written sample output instead of calling Claude — no API key and no API calls. Look around, edit things, break things: "Reset demo data" puts it all back.</div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn sm" onclick="resetDemo()">Reset demo data</button>
+      <button class="btn sm primary" onclick="exitDemo()">Exit demo</button>
+    </div>
+  </div>
 </div>
 
 <!-- Tabs -->
@@ -547,6 +567,7 @@ details.example-details summary:hover{opacity:.8}
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Step 2 — Tailor (optional, score 5+):</strong> Generates a tailored resume and cover note based on your stored resume, the job description, and your custom rules. Also flags any claims worth pressure-testing for accuracy before submitting.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Tracker:</strong> Log every application — status, salary, next action, notes — with a dated, expandable status timeline per application, CSV export/import, and an "Active" filter that excludes rejected, withdrawn, and no-response entries.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Summary:</strong> A monthly recap computed directly from your tracker. Optional "pipeline insights" appear only when a deterministic pattern shows up in your data (for example, several rejections arriving the day after applying, which usually points to automated screening); generating the written observations is a button you click, and nothing it says is ever applied to your scoring rules automatically.</p>
+  <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1rem"><strong style="color:var(--t1);font-weight:500">Demo:</strong> "Try the demo" (next to the API key box) opens the whole tool with a fictional candidate's resume, rules, and tracker, and pre-written sample output for Screen, Tailor, and Generate insights, so you can click through everything without a key. It is labelled as sample output wherever it appears, keeps its data in separate storage from any real profile, and can be reset or exited at any time.</p>
   <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem"><strong style="color:var(--t1);font-weight:500">Using this tool:</strong> Enter your Anthropic API key (get one at console.anthropic.com), then paste any job description and screen it. Each screening costs roughly $0.005-0.01. Resume + cover note generation adds another $0.01-0.02.</p>
   <div class="section-title">Setup</div>
   <div class="section-sub" style="margin-bottom:1rem">Built for anyone to pick up and use with their own background.</div>
@@ -559,6 +580,7 @@ details.example-details summary:hover{opacity:.8}
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">What leaves your browser, and only when you click.</strong> Screen, Generate (tailored materials), and Generate insights send text directly from your browser to Anthropic's API using your own key: your resume, the job description, and your scoring rules, and for insights, the notes from the tracker entries involved. Anthropic's terms and privacy policy govern what happens to it there. This page never stores your key; it exists only in the page until you reload or close it.</li>
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Two other network requests you don't control.</strong> The page loads its fonts from Google Fonts when it opens, so Google can see your IP address and browser details, as with any site that uses it. And the page is served by GitHub Pages, which, like any web host, may keep ordinary server logs (such as IP addresses) that this tool has no access to.</li>
     <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Files you export</strong> (CSV, JSON backups, Markdown summaries) are saved to your own device; nothing is uploaded. Backups contain your resume and tracker notes, so store them somewhere private.</li>
+    <li style="margin-bottom:8px"><strong style="color:var(--t1);font-weight:500">Demo mode</strong> makes no API requests at all — its output is pre-written — and stores its sample data under separate keys, so it never reads or changes a real profile or tracker in the same browser.</li>
     <li><strong style="color:var(--t1);font-weight:500">"Email myself"</strong> only opens your own email app with a short summary pre-filled; nothing is sent unless you press send.</li>
   </ul>
   <p style="font-size:13px;color:var(--t2);line-height:1.7">Originally built by Chris Cannon for his own job search · <a href="https://chrisacannon.github.io" style="color:var(--acc);text-decoration:none" target="_blank">chrisacannon.github.io</a></p>
@@ -568,6 +590,232 @@ details.example-details summary:hover{opacity:.8}
 
 </div>
 
+
+<script>
+// ---------------------------------------------------------------------------
+// DEMO MODE — opened with ?demo=1. Lets a visitor click through the whole
+// tool with no API key and no setup:
+//  * every storage key switches to a separate jst_demo_* namespace, so demo
+//    activity can never read or overwrite a real profile or tracker;
+//  * Screen / Tailor / Generate insights return pre-written sample output
+//    (labelled as such on screen) instead of calling the API.
+// This block must load before the main script, which builds its storage
+// keys from KEY_PREFIX.
+// ---------------------------------------------------------------------------
+const DEMO = new URLSearchParams(location.search).has('demo');
+const KEY_PREFIX = DEMO ? 'jst_demo_' : 'jst_';
+
+function stripQueryAndHash(href) { return href.split('#')[0].split('?')[0]; }
+function enterDemo() { location.href = stripQueryAndHash(location.href) + '?demo=1'; }
+function exitDemo() { location.href = stripQueryAndHash(location.href); }
+
+// Deliberately hard-codes the demo prefix (not KEY_PREFIX) so it can only
+// ever touch demo keys, even if it were called outside demo mode by mistake.
+function clearDemoData() {
+  ['resume_v1', 'rules_v1', 'screen_history_v1', 'tracker_v1'].forEach(k => {
+    try { localStorage.removeItem('jst_demo_' + k); } catch (e) {}
+  });
+}
+function resetDemo() {
+  if (!confirm('Reset the demo back to its original sample data?')) return;
+  clearDemoData();
+  location.reload();
+}
+
+function applyDemoUI() {
+  // Remember each element's own display value so showing it again restores
+  // e.g. an inline display:flex rather than clearing it.
+  const show = (id, on) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.dataset.shownDisplay === undefined) el.dataset.shownDisplay = el.style.display === 'none' ? '' : el.style.display;
+    el.style.display = on ? el.dataset.shownDisplay : 'none';
+  };
+  show('keyBlock', !DEMO);
+  show('demoBanner', DEMO);
+  show('welcomeDemoEntry', !DEMO);
+  if (DEMO) document.title = 'Pipeline HQ — demo';
+}
+
+// First load of the demo: put the fictional profile, sample screening
+// history, and sample job description in place (all in jst_demo_* storage).
+function seedDemoProfile() {
+  if (!DEMO) return;
+  if (!storageGet(STORAGE_KEY_RESUME).trim()) {
+    storageSet(STORAGE_KEY_RESUME, EXAMPLE_RESUME);
+    storageSet(STORAGE_KEY_RULES, JSON.stringify(EXAMPLE_RULE_ANSWERS));
+  }
+  if (!storageGet(SCREEN_HISTORY_KEY)) storageSet(SCREEN_HISTORY_KEY, JSON.stringify(DEMO_HISTORY_SEED));
+  const jd = document.getElementById('jdInput');
+  if (jd && !jd.value.trim()) jd.value = DEMO_SAMPLE_JD;
+}
+
+function demoNotice(what) {
+  return DEMO
+    ? `<div style="border:1px dashed var(--bd2);border-radius:var(--rmd);padding:8px 12px;margin:12px 0;font-size:11px;font-family:var(--ff-mono);color:var(--t3);line-height:1.5">Sample output — ${what} It was pre-written for this demo, not generated by Claude. To run it on your own resume, exit the demo and add your Anthropic API key.</div>`
+    : '';
+}
+
+const DEMO_SAMPLE_JD = `Senior Manager, Category Strategy
+Brightwell Foods — Chicago, IL (hybrid)
+
+About the role
+Brightwell Foods is a mid-sized packaged-foods company. As Senior Manager, Category Strategy you will own the long-range strategy for our shelf-stable snacks category: where to play, how to price, and which products to launch or retire. You will partner with Sales, Marketing, Finance, and Supply Chain, and present recommendations to the executive team.
+
+What you'll do
+- Build the category vision and three-year portfolio plan, including launch, renovation, and discontinuation decisions
+- Lead pricing and promotion strategy with Revenue Management
+- Translate consumer and retail-scanner insights into growth opportunities
+- Develop business cases and scenario analyses with Finance
+- Present category reviews and recommendations to senior leadership
+
+What you bring
+- 8+ years in category management, brand management, portfolio strategy, or a similar function
+- Experience with syndicated retail data (NIQ, Circana) required
+- Strong analytical skills; advanced Excel; experience with a BI tool such as Power BI or Tableau
+- Excellent executive communication and cross-functional influence
+- Packaged goods experience strongly preferred
+- MBA preferred
+
+Compensation: $128,000–$152,000 base plus annual bonus`;
+
+const DEMO_SCREEN_RESULT = {
+  company: 'Brightwell Foods',
+  title: 'Senior Manager, Category Strategy',
+  score: 7,
+  verdict: 'apply',
+  salary_recommendation: '$135,000 (posted range $128,000–$152,000)',
+  fit_reasons: [
+    'Portfolio and lifecycle strategy, including launch and discontinuation decisions, is the core of this role and of the candidate\'s primary experience',
+    'Pricing and revenue strategy across business models, including a move to subscription, maps directly to the pricing and promotion responsibilities',
+    'Executive-level category reviews and cross-functional influence match the candidate\'s track record'
+  ],
+  gaps: [
+    'Syndicated retail data (NIQ, Circana) is listed as required — a real gap per the candidate\'s own rules',
+    'Packaged goods experience is strongly preferred and the candidate has no CPG background',
+    '"Category" here means strategic category ownership rather than retail buying, so this is the strategic version of the title — not a gap, but worth confirming in the screen'
+  ],
+  summary: 'A strong functional match on portfolio strategy, pricing, and executive communication, held back by a required syndicated-data skill and the lack of CPG experience. Worth applying, with the gaps acknowledged plainly rather than glossed over.',
+  role_family: 'Product portfolio / strategy'
+};
+
+const DEMO_TAILOR_RESULT = {
+  resume: `JORDAN ELLIS
+jordan.ellis@example.com
+
+PROFESSIONAL SUMMARY
+Portfolio strategy and analytics leader with extensive experience owning lifecycle planning, pricing, and category decisions for a global consumables portfolio, from new-product planning through discontinuation. Skilled at turning telemetry, regional market inputs, and planning analyses into recommendations that executives act on.
+
+EXPERIENCE
+
+ALDERVANE TECHNOLOGIES — Sr. Category Strategy Manager, Filter Supplies | 2016–2020
+- Served as primary source of assumptions for a ~$1.4B global filter supplies portfolio across multiple generations, four regions, and three business models, including launch, renovation, and end-of-life decisions
+- Led pricing and revenue strategy across developed and emerging markets, including the transition from one-time purchase to subscription replenishment
+- Designed and executed a value-tier SKU strategy for an emerging market facing an aftermarket share crisis, generating $25M+ in incremental revenue
+- Developed and validated demand assumptions in close partnership with Planning Analytics, comparing a new-platform launch to a continue-as-is baseline across ~40 platform x region x channel combinations
+- Presented category reviews and strategic recommendations directly to executive leadership, coordinating across product, operations, supply chain, and regional teams
+- Defined telemetry requirements with the Data Science team to improve visibility into aftermarket share and usage mix
+
+RIDGELINE HOLLOW CAPITAL LLC — Principal | 2020–Present
+- Applied structured market, competitive, and financial analysis to evaluate opportunities and support long-range planning
+- Built reporting frameworks and dashboards to monitor category and consumer behavior trends
+
+OPTERRA VISION SCIENCES — Marketing Consultant | 2015
+- Conducted qualitative and quantitative research to inform product positioning and demand expectations
+
+EDUCATION
+Whitmore University, Sterling School of Business — MBA, 2016
+Ashworth State University — BA, Communication Studies, 2008
+
+SKILLS
+Category & portfolio strategy, pricing strategy, scenario analysis, P&L performance analysis, demand forecasting (assumption development and validation)
+Excel (advanced), Power BI (dashboard and report development), Tableau, Qlik, SQL (basic querying)
+Claude (including Claude API-powered analytical tools)`,
+  cover_note: `Hi Brightwell team —
+
+The Senior Manager, Category Strategy role lines up closely with the work I did owning a global consumables portfolio: setting category strategy, deciding what to launch, renovate, or retire, and presenting those recommendations to executives. I also led pricing across one-time and subscription models, which maps to the pricing and promotion side of your posting.
+
+Two honest gaps: I haven't worked in packaged foods, and I haven't used syndicated retail data like NIQ or Circana day to day. I'd rather say that up front than have it surface later.
+
+I'd be glad to walk through how I'd approach your snacks category in the first ninety days.
+
+Jordan`,
+  salary_suggestion: '$135,000 (posted range $128,000–$152,000)',
+  honest_flags: [
+    'The cover note says syndicated-data experience is limited — confirm that is accurate for you before sending',
+    '"Led pricing" is scoped to strategy and recommendations; the pricing models themselves were built with Revenue Management, so don\'t expand it in interviews',
+    'The first-ninety-days offer commits you to a concrete point of view on the category — have one ready'
+  ]
+};
+
+const DEMO_INSIGHT_SCORING = {
+  observations: [
+    'All five notes name the same two requirements as gaps — syndicated retail data (NIQ/Circana) and CPG background — even though each role was self-scored 7 or 8.',
+    'None of the five reached a screen: three were rejected at the application stage and two have had no response, which fits a hard-requirements filter more than a close call on fit.',
+    'The scoring rules already list syndicated data tools and CPG background as real gaps, so the scores may be crediting adjacent strengths (portfolio strategy, pricing) more than this employer does.'
+  ],
+  caveat: 'Five roles at one employer is a small sample, and one company\'s hiring bar says little about others — treat this as a prompt to look, not a reason to change the rules.'
+};
+
+const DEMO_INSIGHT_QUICK = {
+  observations: [
+    'Two of the three notes record answering "4 years" on an experience question where the posting asked for 7+ or 8+ — a typical knockout-question trigger.',
+    'The third note says there were no knockout questions that the candidate recalls, so the notes can\'t say whether that rejection came from a keyword/parse mismatch, a level mismatch, or a question forgotten.',
+    'All three arrived within a day of applying, consistent with automated screening; the one thread the notes actually support is the years-of-experience answer, not anything about the resume content.'
+  ],
+  caveat: 'Three short notes are thin evidence for a mechanism; checking what each application form actually asked would tell you more than the notes can.'
+};
+
+const DEMO_HISTORY_SEED = [
+  { company: 'Brightwell Foods', title: 'Manager, Portfolio Strategy', score: 7, verdict: 'apply', date: '2026-08-10' },
+  { company: 'Brightwell Foods', title: 'Associate Director, Pricing Analytics', score: 6, verdict: 'review', date: '2026-09-12' }
+];
+
+function demoTrackerSeed() {
+  const e = (n, company, role, date, status, steps, postedSalary, statedSalary, next, notes) =>
+    ({ id: 'demo' + String(n).padStart(2, '0'), company, role, date, status, steps, postedSalary, statedSalary, next, notes });
+  const s = (status, date) => ({ status, date });
+  return [
+    // Five roles at one company that never advanced: fires the "scoring calibration" trigger.
+    e(1, 'Calloway Foods', 'Category Strategy Manager', '2026-08-18', 'rejected_app', [s('rejected_app', '2026-09-02')], '$118,000–$140,000', 'Not asked', 'None', '8/10 match. Syndicated data (NIQ/Circana) and CPG background named as gaps; applied anyway.'),
+    e(2, 'Calloway Foods', 'Senior Manager, Portfolio Strategy', '2026-08-25', 'rejected_app', [s('rejected_app', '2026-09-09')], '$125,000–$150,000', 'Not asked', 'None', '7/10 match. Same two gaps again (syndicated data, CPG background).'),
+    e(3, 'Calloway Foods', 'Pricing Strategy Manager', '2026-09-01', 'rejected_app', [s('rejected_app', '2026-09-16')], 'Not listed', 'Not asked', 'None', '8/10 match. Pricing is a strong fit; syndicated data listed as required and CPG background preferred.'),
+    e(4, 'Calloway Foods', 'Revenue Growth Manager', '2026-09-08', 'pending', [], 'Not listed', 'Not asked', 'Follow up if no response by Oct 20', '7/10 match. Syndicated data and CPG background flagged again; no response after three weeks.'),
+    e(5, 'Calloway Foods', 'Insights & Strategy Manager', '2026-09-14', 'pending', [], 'Not listed', 'Not asked', 'None', '7/10 match. Syndicated data and CPG background flagged again; no response yet.'),
+    // Three rejections the same or next day: fires the "automated screening" trigger.
+    e(6, 'Halden Logistics', 'Strategy & Planning Manager', '2026-09-22', 'rejected_app', [s('rejected_app', '2026-09-22')], '$110,000–$130,000', 'Not asked', 'None', '7/10 match. Answered 4 years on the experience question; posting asked for 7+. Posting went live the day before I applied.'),
+    e(7, 'Orrin Software', 'Senior Product Portfolio Manager', '2026-09-29', 'rejected_app', [s('rejected_app', '2026-09-30')], '$135,000–$160,000', 'Not asked', 'None', '8/10 match. Answered 4 years on the experience question; posting asked for 8+.'),
+    e(8, 'Tessellate Retail', 'Competitive Intelligence Manager', '2026-10-02', 'rejected_app', [s('rejected_app', '2026-10-03')], 'Not listed', 'Not asked', 'None', '7/10 match. No knockout questions that I recall; rejected the next morning.'),
+    // Prior history at the company used in the sample job description (shows the cross-reference banner).
+    e(9, 'Brightwell Foods', 'Manager, Portfolio Strategy', '2026-08-10', 'rejected_screen', [s('screen', '2026-08-19'), s('rejected_screen', '2026-08-26')], '$115,000–$135,000', '$125,000', 'None', '7/10 match. Recruiter screen went well; team wanted packaged-goods experience. Rejected after the screen.'),
+    e(10, 'Brightwell Foods', 'Associate Director, Pricing Analytics', '2026-09-12', 'pending', [], 'Not listed', 'Not asked', 'Follow up if no response by Oct 15', '6/10 match. Level looked slightly senior for my background; no response.'),
+    // A spread of other outcomes.
+    e(11, 'Veridian Home', 'Senior Strategy Manager', '2026-09-05', 'interview', [s('screen', '2026-09-12'), s('interview', '2026-09-19')], '$130,000–$155,000', '$140,000', 'Prep for panel interview', '8/10 match. Strong fit on lifecycle and pricing; recruiter was positive about the comp range.'),
+    e(12, 'Lumora Devices', 'Portfolio Planning Manager', '2026-08-28', 'rejected_hm', [s('screen', '2026-09-04'), s('interview', '2026-09-11'), s('rejected_hm', '2026-09-18')], '$120,000–$145,000', '$130,000', 'None', '8/10 match. Hiring manager interview went fine; feedback was they wanted deeper hands-on forecasting-model experience.'),
+    e(13, 'Pinecrest Health', 'Market Intelligence Manager', '2026-09-10', 'screen', [s('screen', '2026-09-17')], '$112,000–$135,000', '$125,000', 'Await next steps', '7/10 match. Healthcare domain gap acknowledged in the cover note.'),
+    e(14, 'Marlow & Finch', 'Strategy Principal', '2026-08-20', 'withdrawn', [s('screen', '2026-08-29'), s('withdrawn', '2026-09-06')], 'Not listed', '$135,000', 'None', '6/10 match. Withdrew after learning the role required about 40% travel.'),
+    e(15, 'Solenne Brands', 'Senior Category Manager', '2026-10-04', 'applied', [], '$124,000–$146,000', 'Not asked', 'Follow up next week', '7/10 match. Applied through a referral.'),
+    e(16, 'Northvale Energy', 'Pricing Analyst', '2026-09-15', 'rejected_screen', [s('screen', '2026-09-22'), s('rejected_screen', '2026-09-25')], '$98,000–$118,000', '$110,000', 'None', '6/10 match. Energy domain gap; the screen was brief.')
+  ];
+}
+
+async function demoReply(prompt) {
+  await new Promise(r => setTimeout(r, 900));
+  if (prompt.includes('You are evaluating a job posting')) return JSON.stringify(DEMO_SCREEN_RESULT);
+  if (prompt.includes('You are helping a job candidate tailor')) return JSON.stringify(DEMO_TAILOR_RESULT);
+  if (prompt.includes('POSSIBLE scoring-calibration issues')) return JSON.stringify(DEMO_INSIGHT_SCORING);
+  if (prompt.includes('rejected the same or next day after submission')) return JSON.stringify(DEMO_INSIGHT_QUICK);
+  throw new Error('Demo mode has no recorded response for this action.');
+}
+
+// The recorded screen/tailor output only fits the sample job description, so
+// anything else gets an honest notice instead of a mismatched fake result.
+function demoJdMismatch(jd, outEl) {
+  if (!DEMO || jd.trim() === DEMO_SAMPLE_JD.trim()) return false;
+  outEl.innerHTML = `<div class="error-box" style="background:var(--bg2);color:var(--t2);border-color:var(--bd2)">The demo only has recorded output for its sample job description, so it can't screen different text. <button class="btn sm" style="margin-left:8px" onclick="document.getElementById('jdInput').value = DEMO_SAMPLE_JD; document.getElementById('screenOutput').innerHTML = ''">Restore the sample</button> — or exit the demo and add your API key to screen your own.</div>`;
+  return true;
+}
+</script>
 
 <script>
 // ---------------------------------------------------------------------------
@@ -727,8 +975,11 @@ GENERAL GUIDANCE:
 // was merged from. Chrome does not reliably scope localStorage per exact
 // file:// path, so reusing those keys here would read/write the SAME
 // storage bucket as the live tools instead of an isolated copy.
-const STORAGE_KEY_RESUME = 'jst_resume_v1';
-const STORAGE_KEY_RULES = 'jst_rules_v1';
+// KEY_PREFIX (defined in the demo block above) is 'jst_' normally, so these
+// resolve to exactly 'jst_resume_v1' / 'jst_rules_v1' — the same keys real
+// data has always used — and to a separate jst_demo_* pair in demo mode.
+const STORAGE_KEY_RESUME = KEY_PREFIX + 'resume_v1';
+const STORAGE_KEY_RULES = KEY_PREFIX + 'rules_v1';
 
 function storageGet(key) {
   try { return localStorage.getItem(key) || ''; } catch (e) { return ''; }
@@ -881,6 +1132,8 @@ function initApp() {
     box.parentNode.insertBefore(note, box);
   });
 
+  seedDemoProfile(); // no-op outside demo mode
+
   const savedResume = storageGet(STORAGE_KEY_RESUME);
   const savedRules = safeParseJSON(storageGet(STORAGE_KEY_RULES)) || {};
   if (savedResume.trim()) {
@@ -896,6 +1149,7 @@ function initApp() {
     document.getElementById('welcomeScreen').style.display = 'block';
     document.getElementById('mainApp').style.display = 'none';
   }
+  applyDemoUI();
 }
 
 function finishSetup() {
@@ -917,6 +1171,7 @@ function finishSetup() {
 }
 
 function startOver() {
+  if (DEMO) { resetDemo(); return; } // in the demo, "start over" means restore the sample data
   if (!confirm('This clears your saved resume and rule answers from this browser and takes you back to setup. Continue?')) return;
   storageRemove(STORAGE_KEY_RESUME);
   storageRemove(STORAGE_KEY_RULES);
@@ -1076,6 +1331,7 @@ function copyText(id) {
 // ---------------------------------------------------------------------------
 
 async function callClaude(prompt, maxTokens) {
+  if (DEMO) return demoReply(prompt); // pre-written sample output; no request is made
   const key = getKey();
   if (!key) throw new Error('No API key entered.');
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1107,9 +1363,10 @@ async function callClaude(prompt, maxTokens) {
 async function runScreen() {
   const jd = document.getElementById('jdInput').value.trim();
   if (!jd) { alert('Paste a job description first.'); return; }
-  if (!getKey()) { alert('Enter your Anthropic API key first.'); return; }
+  if (!DEMO && !getKey()) { alert('Enter your Anthropic API key first.'); return; }
 
   const out = document.getElementById('screenOutput');
+  if (demoJdMismatch(jd, out)) return;
   out.innerHTML = `<div class="loading"><div class="spin"></div>Screening against your resume…</div>`;
   screenResult = null;
 
@@ -1156,7 +1413,7 @@ verdict: apply = score 7+, review = score 5-6, pass = score 4 or below`;
 // Lightweight record of past screens so repeat companies/roles surface
 // their prior score and outcome instead of being scored in isolation
 // each time. Deterministic lookup, not sent back through the model.
-const SCREEN_HISTORY_KEY = 'jst_screen_history_v1'; // see jst_* namespacing note above
+const SCREEN_HISTORY_KEY = KEY_PREFIX + 'screen_history_v1'; // 'jst_screen_history_v1' normally; see KEY_PREFIX note above
 function loadScreenHistory() {
   try { return JSON.parse(localStorage.getItem(SCREEN_HISTORY_KEY)) || []; }
   catch { return []; }
@@ -1232,6 +1489,7 @@ function renderScreen(r, priorMatches, trackerMatches) {
 
   document.getElementById('screenOutput').innerHTML = `
 <div class="divider"></div>
+${demoNotice('the score, fit reasons, and gaps below.')}
 ${historyBanner}
 ${trackerBanner}
 <div class="score-row">
@@ -1277,6 +1535,7 @@ ${score >= 5 ? `
 async function runTailor() {
   const jd = document.getElementById('jdInput').value.trim();
   const tout = document.getElementById('tailorOutput');
+  if (demoJdMismatch(jd, tout)) return;
   tout.innerHTML = `<div class="loading" style="margin-top:1.25rem"><div class="spin"></div>Generating tailored resume and cover note…</div>`;
 
   const gapContext = screenResult ? `Match score: ${screenResult.score}/10. Role family: ${screenResult.role_family}. Key gaps identified: ${(screenResult.gaps||[]).join('; ')}` : '';
@@ -1331,6 +1590,7 @@ function renderTailor(r) {
 
   document.getElementById('tailorOutput').innerHTML = `
 <div class="divider"></div>
+${demoNotice('the tailored resume, cover note, and flags below.')}
 ${flagsHtml}
 ${salaryHtml}
 <div class="out-block">
@@ -1365,7 +1625,7 @@ window.addEventListener('DOMContentLoaded', initApp);
 // element lookups can't collide either.
 // ---------------------------------------------------------------------------
 window.Tracker = (function(){
-  const STORE_KEY = 'jst_tracker_v1'; // see jst_* namespacing note near STORAGE_KEY_RESUME above
+  const STORE_KEY = KEY_PREFIX + 'tracker_v1'; // 'jst_tracker_v1' normally; see KEY_PREFIX note near STORAGE_KEY_RESUME
   let apps = [];
   let editId = null;
   let activeFilter = 'all';
@@ -1404,6 +1664,7 @@ window.Tracker = (function(){
   // Clearly fictional; delete it once you've added your own.
   function seedIfEmpty() {
     if (apps.length > 0) return;
+    if (DEMO) { apps = demoTrackerSeed(); save(); return; }
     apps = [{
       id: genId(),
       company: 'Example Corp',
@@ -2036,6 +2297,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
     const out = document.getElementById('sm-insightsOutput');
     const items = (result.observations||[]).map(o => `<li>${esc(o)}</li>`).join('');
     out.innerHTML = `
+      ${demoNotice('the observations below.')}
       <div class="sm-insight-box">
         <div style="font-size:10px;font-family:var(--ff-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">AI-generated observations — ${esc(result.category || 'Pipeline insight')}: ${esc(result.label)} — review before acting, nothing here is applied automatically</div>
         <ul>${items}</ul>
