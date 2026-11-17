@@ -199,3 +199,7 @@ Candidates considered:
 - Demo screen and tailor samples updated to match.
 
 Verified: script syntax check, and the screen renderer run against stubbed DOM with risks present, absent, and malformed (escaped HTML confirmed).
+
+**Shipped:** pushed on branch `screener-callback-scoring` and merged to `main` through pull request #1 on November 17, 2026, which published it to GitHub Pages. Not yet tested with a live API key; the first real screening is the check on the new scoring.
+
+**Follow-up (not in the repo):** the owner's own scoring-rule answers were redrafted to match: target roles narrowed to aftermarket, parts and consumables pricing; level and salary-band guidance added; tailoring rules updated. These live in the browser's local storage, not in this repository.
