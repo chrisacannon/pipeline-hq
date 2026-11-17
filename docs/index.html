@@ -704,8 +704,8 @@ const DEMO_SCREEN_RESULT = {
   ],
   summary: 'A strong functional match on portfolio strategy, pricing, and executive communication, held back by a required syndicated-data skill and the lack of CPG experience. Worth applying; prepare honest answers on both gaps for the screen.',
   callback_risks: [
-    'Syndicated retail data is listed under required qualifications, so a screener may stop here before reading the rest',
-    'The posting asks for packaged goods experience, which the resume does not show'
+    { quote: 'Experience with syndicated retail data (NIQ, Circana) required', section: 'required', risk: 'The resume shows no syndicated-data experience, so a screener may stop here before reading the rest' },
+    { quote: 'Packaged goods experience strongly preferred', section: 'preferred', risk: 'No packaged-goods background on the resume; preferred rather than required, so a smaller risk' }
   ],
   role_family: 'Product portfolio / strategy'
 };
@@ -1418,11 +1418,13 @@ Respond with ONLY a valid JSON object, no markdown fences, no extra text:
   "fit_reasons": ["reason 1", "reason 2", "reason 3"],
   "gaps": ["gap 1", "gap 2"],
   "summary": "<2-3 sentence plain language assessment>",
-  "callback_risks": ["<a specific screening criterion in this posting that may stop the candidate before an interview, e.g. a required years minimum, required industry, or level mismatch — empty list if none>"],
+  "callback_risks": [{"quote": "<the posting's exact wording of the requirement, copied verbatim — never paraphrased>", "section": "<'required' | 'preferred' | 'unlabeled' — where that wording appears in the posting>", "risk": "<one sentence on why it may stop the candidate before an interview>"}]
   "role_family": "<which of the candidate's TARGET ROLES this matches, in a few words; 'Outside target roles' if none match; a short plain label for the function if no target roles were given>"
 }
 
-verdict: apply = score 7+, review = score 5-6, pass = score 4 or below`;
+verdict: apply = score 7+, review = score 5-6, pass = score 4 or below
+
+callback_risks rules: include only criteria the posting actually states. Copy the requirement's wording verbatim into "quote" — if a requirement lists alternatives ("sales, marketing, or product management experience"), quote the whole list and judge it against all of them, not just the first. Set "section" from where the wording sits in the posting (a required-qualifications list, a preferred/nice-to-have list, or neither). Leave "callback_risks" as an empty list if nothing qualifies. Level mismatch from title or salary band is the one risk that may have no quote; use the title or band text as the quote.`;
 
   try {
     const raw = await callClaude(prompt, 900);
@@ -1573,7 +1575,13 @@ function renderScreen(r, priorMatches, trackerMatches) {
   const vText = r.verdict === 'apply' ? '✓ Apply' : r.verdict === 'review' ? '⚠ Review before applying' : '✕ Pass';
   const fitItems = (r.fit_reasons||[]).map(x=>`<li>${esc(x)}</li>`).join('');
   const gapItems = (r.gaps||[]).map(x=>`<li>${esc(x)}</li>`).join('');
-  const riskItems = (Array.isArray(r.callback_risks) ? r.callback_risks : []).filter(x => typeof x === 'string' && x.trim()).map(x=>`<li>${esc(x)}</li>`).join('');
+  const riskItems = (Array.isArray(r.callback_risks) ? r.callback_risks : []).map(x => {
+    if (typeof x === 'string') return x.trim() ? `<li>${esc(x)}</li>` : '';
+    if (!x || typeof x !== 'object' || !(x.risk || x.quote)) return '';
+    const sec = ['required', 'preferred', 'unlabeled'].includes(x.section) ? x.section : '';
+    const quote = x.quote ? `<div style="color:var(--t2);margin-top:2px">Posting${sec ? ` (${sec})` : ''}: “${esc(x.quote)}”</div>` : '';
+    return `<li style="margin-bottom:4px">${esc(x.risk || '')}${quote}</li>`;
+  }).join('');
 
   const historyBanner = (priorMatches && priorMatches.length) ? `
 <div style="background:var(--amber-bg,#f5edda);border:1px solid var(--amber,#7a5c1e);border-radius:var(--rmd);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t1)">
