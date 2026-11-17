@@ -203,3 +203,14 @@ Verified: script syntax check, and the screen renderer run against stubbed DOM w
 **Shipped:** pushed on branch `screener-callback-scoring` and merged to `main` through pull request #1 on November 17, 2026, which published it to GitHub Pages. Not yet tested with a live API key; the first real screening is the check on the new scoring.
 
 **Follow-up (not in the repo):** the owner's own scoring-rule answers were redrafted to match: target roles narrowed to aftermarket, parts and consumables pricing; level and salary-band guidance added; tailoring rules updated. These live in the browser's local storage, not in this repository.
+
+## Callback risks quote the posting (November 17, 2026)
+
+*Prompted by two misreads in the first live screenings: a required tool was reported as "preferred," and a requirement listing alternatives ("direct sales, marketing, field engineering, product management, project management, or related commercial experience") was reported as requiring direct sales.*
+
+- Each callback risk is now an object: `quote` (the posting's requirement copied verbatim), `section` (required / preferred / unlabeled, by where the wording sits) and `risk` (one sentence).
+- The prompt tells the model to quote a requirement's full list of alternatives and judge it against all of them, and to leave the list empty when nothing qualifies.
+- The renderer shows each risk with its quote and section underneath. Plain-string risks from older saved results still display.
+- Demo sample updated to the new shape, quoting the demo posting's own lines.
+
+Verified: script syntax check; renderer tested with object risks (quote and section shown, HTML escaped), legacy string risks, an unrecognized section value, malformed entries, and a missing field.
