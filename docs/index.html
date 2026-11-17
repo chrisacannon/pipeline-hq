@@ -702,7 +702,11 @@ const DEMO_SCREEN_RESULT = {
     'Packaged goods experience is strongly preferred and the candidate has no CPG background',
     '"Category" here means strategic category ownership rather than retail buying, so this is the strategic version of the title — not a gap, but worth confirming in the screen'
   ],
-  summary: 'A strong functional match on portfolio strategy, pricing, and executive communication, held back by a required syndicated-data skill and the lack of CPG experience. Worth applying, with the gaps acknowledged plainly rather than glossed over.',
+  summary: 'A strong functional match on portfolio strategy, pricing, and executive communication, held back by a required syndicated-data skill and the lack of CPG experience. Worth applying; prepare honest answers on both gaps for the screen.',
+  callback_risks: [
+    'Syndicated retail data is listed under required qualifications, so a screener may stop here before reading the rest',
+    'The posting asks for packaged goods experience, which the resume does not show'
+  ],
   role_family: 'Product portfolio / strategy'
 };
 
@@ -742,14 +746,15 @@ Claude (including Claude API-powered analytical tools)`,
 
 The Senior Manager, Category Strategy role lines up closely with the work I did owning a global consumables portfolio: setting category strategy, deciding what to launch, renovate, or retire, and presenting those recommendations to executives. I also led pricing across one-time and subscription models, which maps to the pricing and promotion side of your posting.
 
-Two honest gaps: I haven't worked in packaged foods, and I haven't used syndicated retail data like NIQ or Circana day to day. I'd rather say that up front than have it surface later.
+I've also built the analytics behind those calls myself — category reporting dashboards and scenario analysis — so I can move from a question to a recommendation without waiting on a separate team.
 
 I'd be glad to walk through how I'd approach your snacks category in the first ninety days.
 
 Jordan`,
   salary_suggestion: '$135,000 (posted range $128,000–$152,000)',
   honest_flags: [
-    'The cover note says syndicated-data experience is limited — confirm that is accurate for you before sending',
+    'Gap to prepare for: syndicated retail data (NIQ, Circana) is required and you have not used it day to day. If asked, say so plainly and point to the category reporting dashboards you built',
+    'Gap to prepare for: no packaged-foods background. If asked, name the consumables parallel (repeat purchase, price tiers, retailer negotiations) rather than claiming the category',
     '"Led pricing" is scoped to strategy and recommendations; the pricing models themselves were built with Revenue Management, so don\'t expand it in interviews',
     'The first-ninety-days offer commits you to a concrete point of view on the category — have one ready'
   ]
@@ -969,6 +974,12 @@ review = score 5-6
 pass = score 4 or below
 
 GENERAL GUIDANCE:
+- The score should reflect how likely this employer is to advance the candidate, not only how much the work overlaps. Strong functional overlap does not earn a 7+ on its own if the posting's own screening criteria cut against the candidate.
+- Check these screening criteria explicitly and lower the score when they fail:
+  - Required years of experience vs. the candidate's years in the function, read from the resume's dates (a required minimum the candidate falls well short of is a real risk; a "preferred" number is a smaller one).
+  - Required industry or domain experience the candidate does not have (required, not preferred).
+  - Required background types the candidate lacks (e.g. "2+ years of management consulting").
+  - Level mismatch: a title or salary band pitched clearly above the candidate's demonstrated level is a risk even when the work itself fits.
 - Distinguish between a title match and genuine functional fit — read the actual responsibilities and requirements, not just the job title.
 - Do not penalize for skills or tools listed as "nice to have" rather than explicitly required.
 - Treat anything in the candidate's own rules below as authoritative — it overrides general judgment where the two conflict.`;
@@ -1407,7 +1418,8 @@ Respond with ONLY a valid JSON object, no markdown fences, no extra text:
   "fit_reasons": ["reason 1", "reason 2", "reason 3"],
   "gaps": ["gap 1", "gap 2"],
   "summary": "<2-3 sentence plain language assessment>",
-  "role_family": "<which role family this is, from the scoring guidance above>"
+  "callback_risks": ["<a specific screening criterion in this posting that may stop the candidate before an interview, e.g. a required years minimum, required industry, or level mismatch — empty list if none>"],
+  "role_family": "<which of the candidate's TARGET ROLES this matches, in a few words; 'Outside target roles' if none match; a short plain label for the function if no target roles were given>"
 }
 
 verdict: apply = score 7+, review = score 5-6, pass = score 4 or below`;
@@ -1561,6 +1573,7 @@ function renderScreen(r, priorMatches, trackerMatches) {
   const vText = r.verdict === 'apply' ? '✓ Apply' : r.verdict === 'review' ? '⚠ Review before applying' : '✕ Pass';
   const fitItems = (r.fit_reasons||[]).map(x=>`<li>${esc(x)}</li>`).join('');
   const gapItems = (r.gaps||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+  const riskItems = (Array.isArray(r.callback_risks) ? r.callback_risks : []).filter(x => typeof x === 'string' && x.trim()).map(x=>`<li>${esc(x)}</li>`).join('');
 
   const historyBanner = (priorMatches && priorMatches.length) ? `
 <div style="background:var(--amber-bg,#f5edda);border:1px solid var(--amber,#7a5c1e);border-radius:var(--rmd);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t1)">
@@ -1598,6 +1611,11 @@ ${trackerBanner}
 </div>
 
 <div class="summary-box">${esc(r.summary||'')}</div>
+${riskItems ? `
+<div style="background:var(--amber-bg,#f5edda);border:1px solid var(--amber,#7a5c1e);border-radius:var(--rmd);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t1)">
+  <strong>Callback risks</strong> — screening criteria that may stop this application before an interview:
+  <ul style="margin:6px 0 0 18px;padding:0">${riskItems}</ul>
+</div>` : ''}
 
 <div class="two-col">
   <div>
@@ -1649,9 +1667,9 @@ ${gapContext ? `SCREENING CONTEXT:\n${gapContext}\n` : ''}
 TAILORING INSTRUCTIONS:
 1. Write a tailored resume. Keep standard chronological order (most recent experience first). Reframe existing experience honestly to mirror the job description language. Do NOT fabricate experience, credentials, tools, or achievements the candidate does not have. Every bullet must be factually accurate to the candidate's real background. Where there are genuine gaps, do not hide them — let the honest framing do the work instead.
 
-2. Write a confident, direct cover note. Not formal. Not "I am writing to express my interest." Lead with the functional match explicitly. If there are meaningful gaps, acknowledge them briefly and honestly — this builds credibility rather than undermining it. Close with a natural, non-generic sign-off — vary the phrasing each time, and do NOT use the line "I'd welcome a conversation about whether my background is a fit" or close variants of it.
+2. Write a confident, direct cover note. Not formal. Not "I am writing to express my interest." Lead with the functional match explicitly. Do NOT name gaps, missing requirements, or unfamiliar industries in the cover note — it is read by a screener deciding whether to advance the candidate, and the case for the candidate is its only job. Honesty is kept by never overclaiming, not by volunteering gaps. Instead, list each meaningful gap in honest_flags as interview prep (step 3), with a one-line suggestion for how to answer it if asked. Close with a natural, non-generic sign-off — vary the phrasing each time, and do NOT use the line "I'd welcome a conversation about whether my background is a fit" or close variants of it.
 
-3. Flag any claims in the resume or cover note that the candidate should pressure-test for accuracy before submitting — particularly around depth of technical claims, tool proficiency, or scope of ownership.
+3. Flag any claims in the resume or cover note that the candidate should pressure-test for accuracy before submitting — particularly around depth of technical claims, tool proficiency, or scope of ownership. Also flag each meaningful gap from the posting as interview prep, per step 2.
 
 4. CANDIDATE-SPECIFIC RULES — apply these exactly, even if it means rewording beyond what's in the candidate resume text above. These come directly from the candidate and take priority over general phrasing choices:
 ${getCustomRules() || '(None provided.)'}
@@ -1661,7 +1679,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
   "resume": "<full tailored resume as plain text>",
   "cover_note": "<cover note as plain text>",
   "salary_suggestion": "<salary to state if asked, based on JD range if visible>",
-  "honest_flags": ["claim worth pressure-testing 1", "claim worth pressure-testing 2"]
+  "honest_flags": ["claim worth pressure-testing, or a gap to prepare an answer for", "..."]
 }`;
 
   try {

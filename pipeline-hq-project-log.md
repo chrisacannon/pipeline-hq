@@ -187,3 +187,15 @@ Candidates considered:
 **Decision:** hold at the one implemented trigger. The other candidates are recorded here for possible future reconsideration (e.g. if a good way to handle cross-employer inconsistency comes up), not scheduled.
 
 **Relationship to Stage 2:** independent in practice (score comes from notes-text parsing, not the Stage 2 cross-reference join), but Stage 2 landed first since it was already next and has its own value at screening time.
+
+## Screening and tailoring adjustments (November 2026)
+
+*Prompted by a review of 66 tracked applications: most roles scored 7–8 never reached a screen, and many cover notes volunteered gaps.*
+
+- **Scoring now weighs callback likelihood, not only overlap.** The base scoring guide checks required years vs. the candidate's years in the function, required industry or domain, required background types (e.g. consulting), and level mismatch from title or salary band, and lowers the score when they fail.
+- **New `callback_risks` field** in the screen output, shown in an amber box under the summary. Empty or missing renders nothing, so older saved results and the demo still display.
+- **`role_family` defined.** The screen prompt referred to role families "from the scoring guidance above," but none were defined; it now maps to the candidate's own target roles.
+- **Cover notes no longer name gaps.** The tailoring prompt previously told the model to acknowledge gaps in the cover note. Gaps now go to the review flags as interview prep with a suggested answer; honesty is kept by never overclaiming.
+- Demo screen and tailor samples updated to match.
+
+Verified: script syntax check, and the screen renderer run against stubbed DOM with risks present, absent, and malformed (escaped HTML confirmed).
