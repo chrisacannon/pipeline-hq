@@ -1695,11 +1695,13 @@ TAILORING INSTRUCTIONS:
 4. CANDIDATE-SPECIFIC RULES — apply these exactly, even if it means rewording beyond what's in the candidate resume text above. These come directly from the candidate and take priority over general phrasing choices:
 ${getCustomRules() || '(None provided.)'}
 
+5. Before responding, check every sentence of the resume and the cover note against the candidate-specific rules above, especially any language or phrasing rules, and fix each violation. Then check that no bullet or sentence adds a detail, descriptor or scope that the candidate resume does not support (e.g. renaming a project or tool to sound broader). Write resume bullets as plain statements of the work and result; do not append commentary such as "an example of…" or "demonstrating…".
+
 Respond with ONLY a valid JSON object, no markdown fences:
 {
   "resume": "<full tailored resume as plain text>",
   "cover_note": "<cover note as plain text>",
-  "salary_suggestion": "<salary to state if asked, based on JD range if visible>",
+  "salary_suggestion": "<only the number or range to say if asked, e.g. '$150,000–$160,000, within the posted range'; use the candidate's compensation answer if no range is posted. Never suggest saying a range is above or below the candidate's target or that they are at its floor or ceiling; if you name a midpoint, compute it correctly>",
   "honest_flags": ["claim worth pressure-testing, or a gap to prepare an answer for", "..."]
 }`;
 

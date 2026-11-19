@@ -239,3 +239,12 @@ Verified: script syntax check; the prompt's JSON example now parses once placeho
 - **README:** removed the link to the old `job-description-screener` repo, which is now private and showed visitors a 404. The README still names the tool it was merged from, without a link.
 
 Verified: script syntax check; the screening prompt's JSON example still parses; the API wrapper tested with a cut-off reply (clear error) and a complete reply (returned unchanged).
+
+## Tailoring self-check and salary wording (November 19, 2026)
+
+*A tailoring run broke three of the candidate's own rules: the cover note stated a years-of-experience number, two resume bullets ended in filler commentary ("an example of…"), and a project was renamed to sound broader. Its salary suggestion also called $155,000 the midpoint of a $150,000–$170,000 band and coached the candidate to flag the band as above target.*
+
+- **Self-check step added to the tailoring prompt:** before responding, check every sentence against the candidate's rules, remove details the resume doesn't support, and keep bullets free of commentary.
+- **Tailoring salary suggestion** now follows the same rule as the screen: only what to say if asked, no remarks about the candidate's target, and correct arithmetic if a midpoint is named.
+
+Verified: script syntax check. Prompt-only change; needs a live tailoring run to confirm the model follows it.
