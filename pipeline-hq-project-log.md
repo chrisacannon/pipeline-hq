@@ -226,3 +226,12 @@ Verified: script syntax check; renderer tested with object risks (quote and sect
 - **Unsaved-edits warning:** resume and rule edits only take effect after Save. Screening with unsaved edits now asks whether to go back and save first.
 
 Verified: script syntax check; the prompt's JSON example now parses once placeholders are filled; the unsaved-edits check tested for unchanged, edited-rule, edited-resume and empty cases.
+
+## Tailoring output limit (November 19, 2026)
+
+*Generating tailored materials failed with "Unterminated string in JSON": the response was cut off mid-sentence. The full tailored resume, cover note and the longer review flags (gaps now go there as interview prep) no longer fit in the old limit.*
+
+- **Tailoring output limit raised from 2,800 to 8,000 tokens.**
+- **Cut-off responses now give a clear message.** Any reply stopped by the output limit raises "The response was cut off… hit the output limit" instead of a raw JSON parse error, for every step that calls the API.
+
+Verified: script syntax check; the API wrapper tested with a cut-off reply (clear error) and a complete reply (returned unchanged).
