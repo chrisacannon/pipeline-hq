@@ -982,7 +982,9 @@ GENERAL GUIDANCE:
   - Level mismatch: a title or salary band pitched clearly above the candidate's demonstrated level is a risk even when the work itself fits.
 - Distinguish between a title match and genuine functional fit — read the actual responsibilities and requirements, not just the job title.
 - Do not penalize for skills or tools listed as "nice to have" rather than explicitly required.
-- Treat anything in the candidate's own rules below as authoritative — it overrides general judgment where the two conflict.`;
+- Treat anything in the candidate's own rules below as authoritative — it overrides general judgment where the two conflict.
+- Before listing any gap, check it against the candidate's NOT ACTUALLY GAPS answer and the resume itself. If either covers it, it is not a gap and must not appear in "gaps" or "callback_risks", even if the experience is described in different words than the posting uses.
+- A callback risk must be a criterion written in the posting (or a title/salary-band level mismatch). Patterns from the candidate's own history belong in the summary, not in callback_risks.`;
 
 // ---------------------------------------------------------------------------
 // Storage — persists a user's resume/rule answers in this browser only
@@ -1090,6 +1092,13 @@ function renderRuleFields(prefix) {
   });
 }
 
+function hasUnsavedConfig() {
+  const resumeEl = document.getElementById('resumeText');
+  if (resumeEl && resumeEl.value !== sessionResume) return true;
+  const current = getRuleAnswers('config');
+  const saved = sessionRuleAnswers || {};
+  return RULE_QUESTIONS.some(q => (current[q.id] || '') !== ((saved[q.id] || '').trim()));
+}
 function getRuleAnswers(prefix) {
   const answers = {};
   RULE_QUESTIONS.forEach(q => {
@@ -1395,6 +1404,7 @@ async function runScreen() {
 
   const out = document.getElementById('screenOutput');
   if (demoJdMismatch(jd, out)) return;
+  if (!DEMO && hasUnsavedConfig() && !confirm('Your resume or rules have unsaved edits, so this screen would use the last saved version. Cancel to go back and click Save, or OK to screen anyway.')) return;
   out.innerHTML = `<div class="loading"><div class="spin"></div>Screening against your resume…</div>`;
   screenResult = null;
 
@@ -1418,7 +1428,7 @@ Respond with ONLY a valid JSON object, no markdown fences, no extra text:
   "fit_reasons": ["reason 1", "reason 2", "reason 3"],
   "gaps": ["gap 1", "gap 2"],
   "summary": "<2-3 sentence plain language assessment>",
-  "callback_risks": [{"quote": "<the posting's exact wording of the requirement, copied verbatim — never paraphrased>", "section": "<'required' | 'preferred' | 'unlabeled' — where that wording appears in the posting>", "risk": "<one sentence on why it may stop the candidate before an interview>"}]
+  "callback_risks": [{"quote": "<the posting's exact wording of the requirement, copied verbatim — never paraphrased>", "section": "<'required' | 'preferred' | 'unlabeled' — where that wording appears in the posting>", "risk": "<one sentence on why it may stop the candidate before an interview>"}],
   "role_family": "<which of the candidate's TARGET ROLES this matches, in a few words; 'Outside target roles' if none match; a short plain label for the function if no target roles were given>"
 }
 
@@ -1427,7 +1437,7 @@ verdict: apply = score 7+, review = score 5-6, pass = score 4 or below
 callback_risks rules: include only criteria the posting actually states. Copy the requirement's wording verbatim into "quote" — if a requirement lists alternatives ("sales, marketing, or product management experience"), quote the whole list and judge it against all of them, not just the first. Set "section" from where the wording sits in the posting (a required-qualifications list, a preferred/nice-to-have list, or neither). Leave "callback_risks" as an empty list if nothing qualifies. Level mismatch from title or salary band is the one risk that may have no quote; use the title or band text as the quote.`;
 
   try {
-    const raw = await callClaude(prompt, 900);
+    const raw = await callClaude(prompt, 1500);
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const r = JSON.parse(clean);
     screenResult = r;

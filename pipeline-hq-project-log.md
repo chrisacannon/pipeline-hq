@@ -214,3 +214,15 @@ Verified: script syntax check, and the screen renderer run against stubbed DOM w
 - Demo sample updated to the new shape, quoting the demo posting's own lines.
 
 Verified: script syntax check; renderer tested with object risks (quote and section shown, HTML escaped), legacy string risks, an unrecognized section value, malformed entries, and a missing field.
+
+## Screening fixes after the Hilti re-test (November 19, 2026)
+
+*A re-screen after the November 17 changes still listed a gap the candidate's own rules cover, and returned callback risks as plain text with no quote or section.*
+
+- **Fixed a template bug from PR #3:** the JSON example in the screening prompt was missing a comma after `callback_risks`, so the format the model was shown was invalid. This may have contributed to the plain-text risks.
+- **Screen output limit raised from 900 to 1,500 tokens**, since quoted risks make the response longer and a cut-off response fails to parse.
+- **Gaps must respect NOT ACTUALLY GAPS:** the scoring guide now tells the model to check each gap against that answer and the resume, and to drop it if either covers it, even when the wording differs from the posting.
+- **Callback risks limited to posting criteria** (plus level mismatch). Patterns from the candidate's own history go in the summary instead.
+- **Unsaved-edits warning:** resume and rule edits only take effect after Save. Screening with unsaved edits now asks whether to go back and save first.
+
+Verified: script syntax check; the prompt's JSON example now parses once placeholders are filled; the unsaved-edits check tested for unchanged, edited-rule, edited-resume and empty cases.
