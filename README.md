@@ -1,6 +1,6 @@
 # Pipeline HQ
 
-A single-file web tool that screens job postings against a resume, drafts tailored application materials, tracks every application, and surfaces monthly patterns — all in one place, powered by the Claude API. Merged from two separate tools ([job-description-screener](https://github.com/chrisacannon/job-description-screener) and a standalone application tracker) into one, with new cross-referencing and monthly-summary features layered on top.
+A single-file web tool that screens job postings against a resume, drafts tailored application materials, tracks every application, and surfaces monthly patterns — all in one place, powered by the Claude API. Merged from two earlier tools of mine (a job description screener and a standalone application tracker) into one, with new cross-referencing and monthly-summary features layered on top.
 
 Live: https://chrisacannon.github.io/pipeline-hq/
 

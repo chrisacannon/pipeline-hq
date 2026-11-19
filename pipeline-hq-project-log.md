@@ -236,4 +236,6 @@ Verified: script syntax check; the prompt's JSON example now parses once placeho
 
 - **Salary suggestion wording.** The screen's salary suggestion is now only what to say if asked (e.g. "$150,000–$160,000, within the posted range"). It no longer suggests saying a band is above the candidate's target or that they're at its floor; band concerns go in the callback risks.
 
+- **README:** removed the link to the old `job-description-screener` repo, which is now private and showed visitors a 404. The README still names the tool it was merged from, without a link.
+
 Verified: script syntax check; the screening prompt's JSON example still parses; the API wrapper tested with a cut-off reply (clear error) and a complete reply (returned unchanged).
