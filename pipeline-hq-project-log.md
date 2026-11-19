@@ -227,11 +227,13 @@ Verified: script syntax check; renderer tested with object risks (quote and sect
 
 Verified: script syntax check; the prompt's JSON example now parses once placeholders are filled; the unsaved-edits check tested for unchanged, edited-rule, edited-resume and empty cases.
 
-## Tailoring output limit (November 19, 2026)
+## Tailoring output limit and salary wording (November 19, 2026)
 
 *Generating tailored materials failed with "Unterminated string in JSON": the response was cut off mid-sentence. The full tailored resume, cover note and the longer review flags (gaps now go there as interview prep) no longer fit in the old limit.*
 
 - **Tailoring output limit raised from 2,800 to 8,000 tokens.**
 - **Cut-off responses now give a clear message.** Any reply stopped by the output limit raises "The response was cut off… hit the output limit" instead of a raw JSON parse error, for every step that calls the API.
 
-Verified: script syntax check; the API wrapper tested with a cut-off reply (clear error) and a complete reply (returned unchanged).
+- **Salary suggestion wording.** The screen's salary suggestion is now only what to say if asked (e.g. "$150,000–$160,000, within the posted range"). It no longer suggests saying a band is above the candidate's target or that they're at its floor; band concerns go in the callback risks.
+
+Verified: script syntax check; the screening prompt's JSON example still parses; the API wrapper tested with a cut-off reply (clear error) and a complete reply (returned unchanged).
