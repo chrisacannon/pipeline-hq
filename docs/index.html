@@ -1390,6 +1390,9 @@ async function callClaude(prompt, maxTokens) {
     throw new Error(err.error?.message || 'API error ' + resp.status);
   }
   const data = await resp.json();
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('The response was cut off before it finished because it hit the output limit, so it could not be read. Try again; if it keeps happening, the limit for this step needs raising.');
+  }
   return data.content.map(b => b.text || '').join('');
 }
 
@@ -1424,7 +1427,7 @@ Respond with ONLY a valid JSON object, no markdown fences, no extra text:
   "title": "<job title from the posting>",
   "score": <integer 1-10>,
   "verdict": <"apply" | "review" | "pass">,
-  "salary_recommendation": "<what salary to state if asked, e.g. '$130,000' — or 'Not listed — suggest $120,000–$130,000' if no range given>",
+  "salary_recommendation": "<only the number or range to say if asked, e.g. '$130,000' or '$150,000–$160,000, within the posted range' — or 'Not listed — suggest $120,000–$130,000' if no range given. Never suggest saying the range is above or below the candidate's target, or that the candidate is at the floor or ceiling of it; any concern about the band belongs in callback_risks>",
   "fit_reasons": ["reason 1", "reason 2", "reason 3"],
   "gaps": ["gap 1", "gap 2"],
   "summary": "<2-3 sentence plain language assessment>",
@@ -1701,7 +1704,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
 }`;
 
   try {
-    const raw = await callClaude(prompt, 2800);
+    const raw = await callClaude(prompt, 8000);
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const r = JSON.parse(clean);
     renderTailor(r);
