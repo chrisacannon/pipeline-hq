@@ -270,3 +270,12 @@ Verified: script syntax check; the check tested with issues found (HTML escaped)
 - **Accuracy-check output limit raised from 3,000 to 6,000 tokens** for the longer response.
 
 Verified: script syntax check; renderer tested with and without the `checked` list (singular/plural count), plus the earlier issue, clean, fenced-JSON, failure and stale-run cases.
+
+## Output limits raised after the Sonnet 5.5 switch (November 20, 2026)
+
+*The first screen after switching to Sonnet 5.5 was cut off at the 1,500-token limit. Sonnet 5.5 writes fuller responses than Sonnet 4.6 for the same prompt, so the limits set for the older model are too tight.*
+
+- **Screen limit raised from 1,500 to 4,000 tokens; monthly-summary insight limit from 700 to 2,000.** Tailoring (8,000) and the accuracy check (6,000) already had room.
+- Limits are ceilings, not targets: billing is for tokens actually written, so higher limits don't raise the cost of a normal run.
+
+Verified: script syntax check.
