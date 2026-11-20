@@ -710,6 +710,14 @@ const DEMO_SCREEN_RESULT = {
   role_family: 'Product portfolio / strategy'
 };
 
+const DEMO_AUDIT_RESULT = {
+  issues: [
+    { where: 'resume', quote: 'extensive experience owning lifecycle planning, pricing, and category decisions',
+      problem: 'The source resume says primary analytical owner of the inputs to these decisions, not owner of the decisions; "category decisions" does not appear in it.',
+      fix: 'extensive experience as primary analytical owner of P&L performance inputs, lifecycle planning and pricing analysis' }
+  ]
+};
+
 const DEMO_TAILOR_RESULT = {
   resume: `JORDAN ELLIS
 jordan.ellis@example.com
@@ -813,6 +821,7 @@ function demoTrackerSeed() {
 
 async function demoReply(prompt) {
   await new Promise(r => setTimeout(r, 900));
+  if (prompt.includes('You are auditing a tailored resume and cover note')) return JSON.stringify(DEMO_AUDIT_RESULT);
   if (prompt.includes('You are evaluating a job posting')) return JSON.stringify(DEMO_SCREEN_RESULT);
   if (prompt.includes('You are helping a job candidate tailor')) return JSON.stringify(DEMO_TAILOR_RESULT);
   if (prompt.includes('POSSIBLE scoring-calibration issues')) return JSON.stringify(DEMO_INSIGHT_SCORING);
@@ -1710,9 +1719,73 @@ Respond with ONLY a valid JSON object, no markdown fences:
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const r = JSON.parse(clean);
     renderTailor(r);
+    runAudit(r, jd);
   } catch(e) {
     tout.innerHTML = `<div class="error-box" style="margin-top:1.25rem">Error: ${esc(e.message)}</div>`;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Accuracy check — a second, separate call that only compares the draft
+// against the saved resume and rules. The drafting call is asked to follow
+// the rules too, but in practice it drifts toward the posting's language;
+// a checker with no job to "sell" catches what the drafter misses.
+// ---------------------------------------------------------------------------
+
+let auditRun = 0;
+async function runAudit(draft, jd) {
+  const runId = ++auditRun;
+  const box = () => (runId === auditRun ? document.getElementById('auditOut') : null);
+  if (!box()) return;
+  const prompt = `You are auditing a tailored resume and cover note for accuracy against the candidate's own source material. You are not improving the writing and you are not judging fit. Your only job is to find claims the source material does not support and places that break the candidate's rules.
+
+SOURCE RESUME (the only record of what the candidate has done):
+${getResume()}
+
+CANDIDATE'S RULES (follow exactly; language and phrasing rules count):
+${getCustomRules() || '(None provided.)'}
+
+JOB POSTING (context only — matching its wording is never a reason to accept a claim):
+${jd}
+
+DRAFT RESUME:
+${draft.resume || ''}
+
+DRAFT COVER NOTE:
+${draft.cover_note || ''}
+
+Check every sentence and bullet of both drafts. Report an issue when the draft:
+- states something the source resume does not support, including added scope, results, tools, audiences, responsibilities or descriptors (e.g. renaming a project to sound broader, or turning "led the analysis behind" into "owned" or "set");
+- breaks any of the candidate's rules, including exact-wording rules;
+- changes the candidate's professional identity to match the posting (e.g. a new job-family label in the summary);
+- uses present tense for work the candidate is not doing now;
+- moves a project or achievement under an employer it did not belong to.
+Do not report wording that is a fair, accurate restatement of the source. Do not report gaps or missing experience.
+
+Respond with ONLY a valid JSON object, no markdown fences:
+{
+  "issues": [{"where": "<'resume' or 'cover_note'>", "quote": "<the draft's exact words, copied verbatim>", "problem": "<one sentence: what the source or rule says instead>", "fix": "<replacement wording that the source supports, or 'Remove'>"}]
+}
+Return {"issues": []} if you find nothing.`;
+  try {
+    const raw = await callClaude(prompt, 3000);
+    const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+    const a = JSON.parse(clean);
+    if (box()) box().innerHTML = renderAudit(a);
+  } catch (e) {
+    if (box()) box().innerHTML = `<div class="flags-box"><div class="flags-head">Accuracy check</div><div class="flag-item">The accuracy check couldn't run (${esc(e.message)}). The draft below is unchecked; review every claim against your resume.</div></div>`;
+  }
+}
+
+function renderAudit(a) {
+  const issues = (Array.isArray(a && a.issues) ? a.issues : []).filter(i => i && typeof i === 'object' && (i.quote || i.problem));
+  if (!issues.length) {
+    return `<div class="flags-box" style="background:var(--bg2);border-color:var(--bd2)"><div class="flags-head" style="color:var(--t2)">Accuracy check</div><div class="flag-item" style="color:var(--t2)">No unsupported claims or rule breaks found. Still read the draft yourself before sending.</div></div>`;
+  }
+  const where = w => w === 'cover_note' ? 'Cover note' : 'Resume';
+  return `<div class="flags-box"><div class="flags-head">Accuracy check — ${issues.length} issue${issues.length > 1 ? 's' : ''} to fix before sending</div>
+${issues.map(i => `<div class="flag-item"><strong>${where(i.where)}:</strong> “${esc(i.quote || '')}”<div style="margin-top:2px">${esc(i.problem || '')}</div>${i.fix ? `<div style="margin-top:2px"><em>Fix:</em> ${esc(i.fix)}</div>` : ''}</div>`).join('')}
+</div>`;
 }
 
 function renderTailor(r) {
@@ -1728,6 +1801,7 @@ function renderTailor(r) {
   document.getElementById('tailorOutput').innerHTML = `
 <div class="divider"></div>
 ${demoNotice('the tailored resume, cover note, and flags below.')}
+<div id="auditOut"><div class="loading" style="margin-bottom:1rem"><div class="spin"></div>Checking the draft against your resume and rules…</div></div>
 ${flagsHtml}
 ${salaryHtml}
 <div class="out-block">
