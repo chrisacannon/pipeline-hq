@@ -291,3 +291,12 @@ Verified: script syntax check.
 - Session only: nothing is saved between visits. Demo mode makes no API calls, so the panel stays hidden there.
 
 Verified: script syntax check; recording, cost arithmetic, timing, panel text, session total and cut-off marking tested with stubbed responses, including a dated model name in the response.
+
+## Usage panel scoped to Screen; monthly spend card (November 20, 2026)
+
+- **The usage panel now shows only on the Screen a role tab** and hides on the other tabs. Calls made elsewhere (monthly-summary insights) are still recorded.
+- **Monthly running totals** saved in this browser under `jst_usage_monthly_v1`: one small object per calendar month (`calls`, `cost`, `input`, `output`), updated after every API call. About 80 bytes per month, so years of use stay a few KB.
+- **New Summary card: "Est. API spend (N calls)"** for the selected month. Months before tracking began show "not tracked." Hidden in demo mode.
+- Counts only calls made in this browser, and "Start over" leaves it in place (like the tracker). Spend is an estimate from list prices; the Claude Console remains the billing record.
+
+Verified: script syntax check; monthly accumulation, cost arithmetic, the card's tracked and untracked states, tab-based hiding and demo-mode hiding tested with stubbed storage.
