@@ -1389,7 +1389,7 @@ async function callClaude(prompt, maxTokens) {
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-sonnet-5-5',
       max_tokens: maxTokens || 1000,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -1754,7 +1754,7 @@ ${draft.resume || ''}
 DRAFT COVER NOTE:
 ${draft.cover_note || ''}
 
-Check every sentence and bullet of both drafts. Report an issue when the draft:
+Work line by line. First go through the drafts in order — every resume line (summary sentences, each bullet, each skills line) and every cover-note sentence — and record a verdict for each in "checked". Only after every line has a verdict, copy the failing ones into "issues". A line fails when the draft:
 - states something the source resume does not support, including added scope, results, tools, audiences, responsibilities or descriptors (e.g. renaming a project to sound broader, or turning "led the analysis behind" into "owned" or "set");
 - breaks any of the candidate's rules, including exact-wording rules;
 - changes the candidate's professional identity to match the posting (e.g. a new job-family label in the summary);
@@ -1764,11 +1764,12 @@ Do not report wording that is a fair, accurate restatement of the source. Do not
 
 Respond with ONLY a valid JSON object, no markdown fences:
 {
-  "issues": [{"where": "<'resume' or 'cover_note'>", "quote": "<the draft's exact words, copied verbatim>", "problem": "<one sentence: what the source or rule says instead>", "fix": "<replacement wording that the source supports, or 'Remove'>"}]
+  "checked": [{"where": "<'resume' or 'cover_note'>", "starts": "<first six words of the line>", "ok": <true or false>}],
+  "issues": [{"where": "<'resume' or 'cover_note'>", "quote": "<the failing words, copied verbatim>", "problem": "<one sentence: what the source or rule says instead>", "fix": "<replacement wording that the source supports, or 'Remove'>"}]
 }
-Return {"issues": []} if you find nothing.`;
+Every line with "ok": false must have a matching entry in "issues". Return an empty "issues" list only if every line is ok.`;
   try {
-    const raw = await callClaude(prompt, 3000);
+    const raw = await callClaude(prompt, 6000);
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const a = JSON.parse(clean);
     if (box()) box().innerHTML = renderAudit(a);
@@ -1779,11 +1780,13 @@ Return {"issues": []} if you find nothing.`;
 
 function renderAudit(a) {
   const issues = (Array.isArray(a && a.issues) ? a.issues : []).filter(i => i && typeof i === 'object' && (i.quote || i.problem));
+  const checked = Array.isArray(a && a.checked) ? a.checked.filter(c => c && typeof c === 'object') : [];
+  const coverage = checked.length ? ` (${checked.length} line${checked.length > 1 ? 's' : ''} checked)` : '';
   if (!issues.length) {
-    return `<div class="flags-box" style="background:var(--bg2);border-color:var(--bd2)"><div class="flags-head" style="color:var(--t2)">Accuracy check</div><div class="flag-item" style="color:var(--t2)">No unsupported claims or rule breaks found. Still read the draft yourself before sending.</div></div>`;
+    return `<div class="flags-box" style="background:var(--bg2);border-color:var(--bd2)"><div class="flags-head" style="color:var(--t2)">Accuracy check${coverage}</div><div class="flag-item" style="color:var(--t2)">No unsupported claims or rule breaks found. Still read the draft yourself before sending.</div></div>`;
   }
   const where = w => w === 'cover_note' ? 'Cover note' : 'Resume';
-  return `<div class="flags-box"><div class="flags-head">Accuracy check — ${issues.length} issue${issues.length > 1 ? 's' : ''} to fix before sending</div>
+  return `<div class="flags-box"><div class="flags-head">Accuracy check${coverage} — ${issues.length} issue${issues.length > 1 ? 's' : ''} to fix before sending</div>
 ${issues.map(i => `<div class="flag-item"><strong>${where(i.where)}:</strong> “${esc(i.quote || '')}”<div style="margin-top:2px">${esc(i.problem || '')}</div>${i.fix ? `<div style="margin-top:2px"><em>Fix:</em> ${esc(i.fix)}</div>` : ''}</div>`).join('')}
 </div>`;
 }

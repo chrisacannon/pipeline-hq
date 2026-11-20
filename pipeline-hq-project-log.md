@@ -260,3 +260,13 @@ Verified: script syntax check. Prompt-only change; needs a live tailoring run to
 - **Cost:** roughly one extra API call per tailoring run, about the size of the drafting call's input.
 
 Verified: script syntax check; the check tested with issues found (HTML escaped), none found, fenced JSON, a failed call, and a stale run finishing after a newer one.
+
+## Sonnet 5.5 and a line-by-line accuracy check (November 20, 2026)
+
+*On a live re-test, the accuracy check caught 4 of about 10 problems; it reported what stood out and skipped the rest.*
+
+- **Model switched from `claude-sonnet-4-6` to `claude-sonnet-5-5`** for every call (screen, tailoring, accuracy check, monthly summaries). Sonnet 5.5 is newer and lists at $2/$10 per million input/output tokens versus $3/$15.
+- **The accuracy check now works line by line:** it records a verdict for every resume line and cover-note sentence in a `checked` list before copying failures into `issues`. The header shows how many lines were checked, so a short list is visible at a glance.
+- **Accuracy-check output limit raised from 3,000 to 6,000 tokens** for the longer response.
+
+Verified: script syntax check; renderer tested with and without the `checked` list (singular/plural count), plus the earlier issue, clean, fenced-JSON, failure and stale-run cases.

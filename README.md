@@ -44,6 +44,6 @@ This started as a merge of two working, separately-maintained tools, built caref
 ## Tech notes
 
 * Single static HTML file. No build step, no backend, no scripts or libraries loaded from elsewhere — the only external resources are the Anthropic API (when you ask it to) and Google Fonts (stylesheets only).
-* Model: `claude-sonnet-4-6` via `POST https://api.anthropic.com/v1/messages`, called directly from the browser.
+* Model: `claude-sonnet-5-5` via `POST https://api.anthropic.com/v1/messages`, called directly from the browser.
 
 Built by Chris Cannon · [chrisacannon.github.io](https://chrisacannon.github.io/)
