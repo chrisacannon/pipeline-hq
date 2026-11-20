@@ -989,6 +989,7 @@ GENERAL GUIDANCE:
   - Required industry or domain experience the candidate does not have (required, not preferred).
   - Required background types the candidate lacks (e.g. "2+ years of management consulting").
   - Level mismatch: a title or salary band pitched clearly above the candidate's demonstrated level is a risk even when the work itself fits.
+  - Level below the candidate: a role pitched clearly below the candidate's level (e.g. an analyst title asking for 2+ years from someone targeting manager or lead roles) is also a risk. It usually means pay below the candidate's floor, and employers often pass on candidates they expect to be overqualified or to leave. When no pay is posted, estimate the likely range from the title, required years and location, and treat a likely range below the candidate's compensation floor as a callback risk (quote the title or required-years wording).
 - Distinguish between a title match and genuine functional fit — read the actual responsibilities and requirements, not just the job title.
 - Do not penalize for skills or tools listed as "nice to have" rather than explicitly required.
 - Treat anything in the candidate's own rules below as authoritative — it overrides general judgment where the two conflict.
@@ -1488,7 +1489,7 @@ async function runScreen() {
   out.innerHTML = `<div class="loading"><div class="spin"></div>Screening against your resume…</div>`;
   screenResult = null;
 
-  const prompt = `You are evaluating a job posting against a candidate's resume to assess fit.
+  const prompt = `You are evaluating a job posting against a candidate's resume to assess fit. Write every text field in the third person about the candidate ("the candidate", or their first name), never as "I" or "my".
 
 CANDIDATE RESUME:
 ${getResume()}
@@ -1504,7 +1505,7 @@ Respond with ONLY a valid JSON object, no markdown fences, no extra text:
   "title": "<job title from the posting>",
   "score": <integer 1-10>,
   "verdict": <"apply" | "review" | "pass">,
-  "salary_recommendation": "<only the number or range to say if asked, e.g. '$130,000' or '$150,000–$160,000, within the posted range' — or 'Not listed — suggest $120,000–$130,000' if no range given. Never suggest saying the range is above or below the candidate's target, or that the candidate is at the floor or ceiling of it; any concern about the band belongs in callback_risks>",
+  "salary_recommendation": "<only the number or range to say if asked, e.g. '$130,000' or '$150,000–$160,000, within the posted range' — or, if no range is posted, 'Not listed — likely about $X–$Y for this level; suggest $A–$B', where $X–$Y is your estimate for the role and $A–$B is what the candidate should say (within the likely range if it is near their floor; if the likely range is well below their floor, say so in callback_risks rather than suggesting a number the employer won't pay). Never suggest saying the range is above or below the candidate's target, or that the candidate is at the floor or ceiling of it; any concern about the band belongs in callback_risks>",
   "fit_reasons": ["reason 1", "reason 2", "reason 3"],
   "gaps": ["gap 1", "gap 2"],
   "summary": "<2-3 sentence plain language assessment>",
@@ -1514,7 +1515,7 @@ Respond with ONLY a valid JSON object, no markdown fences, no extra text:
 
 verdict: apply = score 7+, review = score 5-6, pass = score 4 or below
 
-callback_risks rules: include only criteria the posting actually states. Copy the requirement's wording verbatim into "quote" — if a requirement lists alternatives ("sales, marketing, or product management experience"), quote the whole list and judge it against all of them, not just the first. Set "section" from where the wording sits in the posting (a required-qualifications list, a preferred/nice-to-have list, or neither). Leave "callback_risks" as an empty list if nothing qualifies. Level mismatch from title or salary band is the one risk that may have no quote; use the title or band text as the quote.`;
+callback_risks rules: include only criteria the posting actually states. Never include a criterion the posting itself calls "not required" or "a plus". Include a preferred criterion only when it is likely to decide who gets a callback (e.g. a named industry the posting clearly favors); otherwise leave it to "gaps". Copy the requirement's wording verbatim into "quote" — if a requirement lists alternatives ("sales, marketing, or product management experience"), quote the whole list and judge it against all of them, not just the first. Set "section" from the requirement's own wording first: if the sentence itself says "preferred", "a plus", "nice to have", "ideally" or "not required", it is 'preferred' even when it sits in a required-qualifications list. Otherwise set it (a required-qualifications list, a preferred/nice-to-have list, or neither). Leave "callback_risks" as an empty list if nothing qualifies. Level mismatch from title or salary band is the one risk that may have no quote; use the title or band text as the quote.`;
 
   try {
     const raw = await callClaude(prompt, 4000, 'Screen');

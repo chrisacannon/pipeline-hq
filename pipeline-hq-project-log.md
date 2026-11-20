@@ -300,3 +300,15 @@ Verified: script syntax check; recording, cost arithmetic, timing, panel text, s
 - Counts only calls made in this browser, and "Start over" leaves it in place (like the tracker). Spend is an estimate from list prices; the Claude Console remains the billing record.
 
 Verified: script syntax check; monthly accumulation, cost arithmetic, the card's tracked and untracked states, tab-based hiding and demo-mode hiding tested with stubbed storage.
+
+## Screening: third person, wording-based sections, below-level check (November 20, 2026)
+
+*A Pricing Analyst screen (no pay posted, 2+ years required) wrote in the first person, labeled two "preferred"/"a plus" lines as required, listed a "not required" item as a callback risk, and suggested the candidate's floor for a role likely paying well under it.*
+
+- **Third person:** every text field now refers to "the candidate" or their first name. The first-person voice appeared after the switch to Sonnet 5.5.
+- **Section by wording:** a requirement whose own sentence says "preferred", "a plus", "nice to have", "ideally" or "not required" is labeled preferred, even inside a required-qualifications list.
+- **Fewer weak risks:** items the posting calls "not required" or "a plus" are never callback risks; other preferred items only when likely to decide callbacks.
+- **Below-level check:** the scoring guide now treats roles pitched clearly below the candidate's level as a risk (likely underpay, overqualification concerns). With no pay posted, the model estimates a likely range from title, years and location and flags it if below the candidate's floor.
+- **Salary suggestion** for unposted roles now gives the estimated range for the level and what to say, instead of defaulting to the candidate's own floor.
+
+Verified: script syntax check; the screening prompt's JSON example still parses. Prompt-only; needs a live screen to confirm.
