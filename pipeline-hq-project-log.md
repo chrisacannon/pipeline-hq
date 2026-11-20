@@ -248,3 +248,15 @@ Verified: script syntax check; the screening prompt's JSON example still parses;
 - **Tailoring salary suggestion** now follows the same rule as the screen: only what to say if asked, no remarks about the candidate's target, and correct arithmetic if a midpoint is named.
 
 Verified: script syntax check. Prompt-only change; needs a live tailoring run to confirm the model follows it.
+
+## Accuracy check after tailoring (November 20, 2026)
+
+*Three live tailoring runs drifted the same way despite the self-check added in PR #6: the summary relabeled the candidate to match the posting's job family, exact-wording rules were dropped, and plausible details from the posting were added. Instructions inside the drafting prompt weren't enough, because the drafting call is trying to match the posting.*
+
+- **New second call after every tailoring run.** It sees only the saved resume, the candidate's rules, the posting (as context) and the draft, and its one job is to list claims the source doesn't support or rules the draft breaks: added scope or descriptors, identity changes, present tense for past work, projects moved under the wrong employer.
+- **Shown first, above the review flags,** as "Accuracy check — N issues to fix before sending," each with the draft's exact words, what the source or rule says instead, and a suggested fix. A clean result says so but still asks for a read-through.
+- **The draft shows immediately;** the check fills in when it finishes. If the check fails, the draft is labeled unchecked rather than hidden. Re-running tailoring before a check finishes discards the stale result.
+- **Demo mode** has a recorded check result for the sample posting.
+- **Cost:** roughly one extra API call per tailoring run, about the size of the drafting call's input.
+
+Verified: script syntax check; the check tested with issues found (HTML escaped), none found, fenced JSON, a failed call, and a stale run finishing after a newer one.
