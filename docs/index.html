@@ -1227,7 +1227,10 @@ function startOver() {
 // ---------------------------------------------------------------------------
 
 const TAB_NAMES = ['screen','config','tracker','summary','about'];
+let currentTab = 'screen';
 function showTab(name) {
+  currentTab = name;
+  if (typeof renderUsagePanel === 'function') renderUsagePanel();
   TAB_NAMES.forEach(t => {
     document.getElementById('tab-'+t).style.display = t === name ? 'block' : 'none';
   });
@@ -1383,6 +1386,22 @@ const MODEL = 'claude-sonnet-5-5';
 const MODEL_PRICES = { 'claude-sonnet-5-5': { input: 2, output: 10, cacheRead: 0.10, cacheWrite: 2.50 } }; // USD per million tokens
 const usageLog = [];
 
+// Monthly running totals, kept in this browser. One small object per month
+// ({calls, cost, input, output}), so even years of use stay a few KB.
+const STORAGE_KEY_SPEND = KEY_PREFIX + 'usage_monthly_v1';
+function getMonthlySpend() {
+  try { return JSON.parse(storageGet(STORAGE_KEY_SPEND) || '{}') || {}; } catch (e) { return {}; }
+}
+function addMonthlySpend(entry) {
+  const d = new Date();
+  const month = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  const all = getMonthlySpend();
+  const m = all[month] || { calls: 0, cost: 0, input: 0, output: 0 };
+  m.calls += 1; m.cost += entry.cost || 0; m.input += entry.input; m.output += entry.output;
+  all[month] = m;
+  storageSet(STORAGE_KEY_SPEND, JSON.stringify(all));
+}
+
 function estimateCost(model, u) {
   const p = MODEL_PRICES[model];
   if (!p || !u) return null;
@@ -1392,8 +1411,10 @@ function estimateCost(model, u) {
 
 function recordUsage(label, model, usage, ms, cutOff) {
   // Price by the model requested; the response may report a longer, dated model name.
-  usageLog.push({ label, model, input: usage?.input_tokens || 0, output: usage?.output_tokens || 0,
-                  cost: estimateCost(MODEL_PRICES[model] ? model : MODEL, usage), ms, cutOff: !!cutOff });
+  const entry = { label, model, input: usage?.input_tokens || 0, output: usage?.output_tokens || 0,
+                  cost: estimateCost(MODEL_PRICES[model] ? model : MODEL, usage), ms, cutOff: !!cutOff };
+  usageLog.push(entry);
+  addMonthlySpend(entry);
   renderUsagePanel();
 }
 
@@ -1410,7 +1431,7 @@ function renderUsagePanel() {
     el.addEventListener('click', () => { el.dataset.open = el.dataset.open === '1' ? '' : '1'; renderUsagePanel(); });
     document.body.appendChild(el);
   }
-  if (!usageLog.length) { el.style.display = 'none'; return; }
+  if (!usageLog.length || currentTab !== 'screen') { el.style.display = 'none'; return; }
   el.style.display = 'block';
   const last = usageLog[usageLog.length - 1];
   const totalCost = usageLog.reduce((t, u) => t + (u.cost || 0), 0);
@@ -2391,10 +2412,18 @@ window.Summary = (function(){
     return { monthStr, total: inMonth.length, byLabel, topStage, topCount, screensPlus, offers, entries: inMonth };
   }
 
+  function spendCard(monthStr) {
+    if (DEMO) return '';
+    const m = monthStr ? getMonthlySpend()[monthStr] : null;
+    const num = m ? '$' + m.cost.toFixed(2) : '—';
+    const label = m ? `Est. API spend (${m.calls} call${m.calls === 1 ? '' : 's'})` : 'Est. API spend (not tracked this month)';
+    return `<div class="sm-stat" title="Estimated from token counts and list prices; counts calls made in this browser only."><div class="sm-stat-num">${num}</div><div class="sm-stat-label">${label}</div></div>`;
+  }
+
   function renderStats(stats) {
     const block = document.getElementById('sm-statsBlock');
     if (!stats.monthStr || !stats.total) {
-      block.innerHTML = `<div class="sm-stats-row"><div class="sm-stat"><div class="sm-stat-num">0</div><div class="sm-stat-label">Applications this month</div></div></div>`;
+      block.innerHTML = `<div class="sm-stats-row"><div class="sm-stat"><div class="sm-stat-num">0</div><div class="sm-stat-label">Applications this month</div></div>${spendCard(stats.monthStr)}</div>`;
       return;
     }
     const breakdown = Object.entries(stats.byLabel)
@@ -2406,6 +2435,7 @@ window.Summary = (function(){
         <div class="sm-stat"><div class="sm-stat-num">${stats.total}</div><div class="sm-stat-label">Applications sent</div></div>
         <div class="sm-stat"><div class="sm-stat-num">${stats.screensPlus}</div><div class="sm-stat-label">Reached screen+</div></div>
         <div class="sm-stat"><div class="sm-stat-num" style="${stats.offers ? 'color:var(--green)' : ''}">${stats.offers}</div><div class="sm-stat-label">Offers</div></div>
+        ${spendCard(stats.monthStr)}
       </div>
       <div class="sm-breakdown">${breakdown}</div>
       ${stats.topStage ? `<div class="sm-breakdown" style="margin-top:8px">Most common rejection stage this month: <b>${esc(stats.topStage)}</b> (${stats.topCount})</div>` : ''}
