@@ -279,3 +279,15 @@ Verified: script syntax check; renderer tested with and without the `checked` li
 - Limits are ceilings, not targets: billing is for tokens actually written, so higher limits don't raise the cost of a normal run.
 
 Verified: script syntax check.
+
+## Usage readout (November 20, 2026)
+
+*Requested so each run shows its cost and speed the way the Claude Console playground does.*
+
+- **Fixed panel in the lower-right corner** after the first API call: the last call's step (Screen, Tailor, Accuracy check, Insights), input and output tokens, estimated cost and time, plus a session total. Click it to list every call this session.
+- **Tokens** come from each response's usage block. **Time** is measured in the browser from request to response. **Cost** is an estimate from list prices in `MODEL_PRICES` (Sonnet 5.5: $2 input / $10 output per million tokens); update that table if prices or the model change.
+- Calls cut off at the output limit are still recorded and marked "cut off."
+- The model name now lives in one `MODEL` constant used by the API call and the price lookup.
+- Session only: nothing is saved between visits. Demo mode makes no API calls, so the panel stays hidden there.
+
+Verified: script syntax check; recording, cost arithmetic, timing, panel text, session total and cut-off marking tested with stubbed responses, including a dated model name in the response.

@@ -1376,10 +1376,56 @@ function copyText(id) {
 // API
 // ---------------------------------------------------------------------------
 
-async function callClaude(prompt, maxTokens) {
+// Usage readout — token counts come from each response's usage block; cost is
+// an estimate from list prices (update MODEL_PRICES if prices change); time is
+// measured in the browser from request to response. Kept for this session only.
+const MODEL = 'claude-sonnet-5-5';
+const MODEL_PRICES = { 'claude-sonnet-5-5': { input: 2, output: 10, cacheRead: 0.10, cacheWrite: 2.50 } }; // USD per million tokens
+const usageLog = [];
+
+function estimateCost(model, u) {
+  const p = MODEL_PRICES[model];
+  if (!p || !u) return null;
+  return ((u.input_tokens || 0) * p.input + (u.output_tokens || 0) * p.output
+    + (u.cache_read_input_tokens || 0) * p.cacheRead + (u.cache_creation_input_tokens || 0) * p.cacheWrite) / 1e6;
+}
+
+function recordUsage(label, model, usage, ms, cutOff) {
+  // Price by the model requested; the response may report a longer, dated model name.
+  usageLog.push({ label, model, input: usage?.input_tokens || 0, output: usage?.output_tokens || 0,
+                  cost: estimateCost(MODEL_PRICES[model] ? model : MODEL, usage), ms, cutOff: !!cutOff });
+  renderUsagePanel();
+}
+
+const fmtCost = c => c == null ? 'n/a' : (c < 0.01 ? '$' + c.toFixed(4) : '$' + c.toFixed(3));
+const fmtSecs = ms => (ms / 1000).toFixed(1) + 's';
+
+function renderUsagePanel() {
+  let el = document.getElementById('usagePanel');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'usagePanel';
+    el.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:50;max-width:340px;background:var(--bg2,#f4f3ef);border:0.5px solid var(--bd2,#ccc);border-radius:var(--rmd,8px);padding:8px 10px;font-family:var(--ff-mono,monospace);font-size:11px;color:var(--t2,#555);line-height:1.5;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)';
+    el.title = 'Click to show or hide every call this session';
+    el.addEventListener('click', () => { el.dataset.open = el.dataset.open === '1' ? '' : '1'; renderUsagePanel(); });
+    document.body.appendChild(el);
+  }
+  if (!usageLog.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const last = usageLog[usageLog.length - 1];
+  const totalCost = usageLog.reduce((t, u) => t + (u.cost || 0), 0);
+  const line = u => `${esc(u.label)} · ${u.input.toLocaleString()} in / ${u.output.toLocaleString()} out · ~${fmtCost(u.cost)} · ${fmtSecs(u.ms)}${u.cutOff ? ' · cut off' : ''}`;
+  const details = el.dataset.open === '1'
+    ? `<div style="margin-top:6px;border-top:0.5px solid var(--bd2,#ccc);padding-top:6px">${usageLog.map(line).join('<br>')}</div>` : '';
+  el.innerHTML = `<div><strong>Last:</strong> ${line(last)}</div>
+<div><strong>Session:</strong> ${usageLog.length} call${usageLog.length > 1 ? 's' : ''} · ~${fmtCost(totalCost)} · ${esc(last.model)}</div>${details}`;
+}
+
+async function callClaude(prompt, maxTokens, label) {
   if (DEMO) return demoReply(prompt); // pre-written sample output; no request is made
   const key = getKey();
   if (!key) throw new Error('No API key entered.');
+  const started = performance.now();
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -1389,7 +1435,7 @@ async function callClaude(prompt, maxTokens) {
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-5-5',
+      model: MODEL,
       max_tokens: maxTokens || 1000,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -1399,6 +1445,7 @@ async function callClaude(prompt, maxTokens) {
     throw new Error(err.error?.message || 'API error ' + resp.status);
   }
   const data = await resp.json();
+  recordUsage(label || 'Call', data.model || MODEL, data.usage, performance.now() - started, data.stop_reason === 'max_tokens');
   if (data.stop_reason === 'max_tokens') {
     throw new Error('The response was cut off before it finished because it hit the output limit, so it could not be read. Try again; if it keeps happening, the limit for this step needs raising.');
   }
@@ -1449,7 +1496,7 @@ verdict: apply = score 7+, review = score 5-6, pass = score 4 or below
 callback_risks rules: include only criteria the posting actually states. Copy the requirement's wording verbatim into "quote" — if a requirement lists alternatives ("sales, marketing, or product management experience"), quote the whole list and judge it against all of them, not just the first. Set "section" from where the wording sits in the posting (a required-qualifications list, a preferred/nice-to-have list, or neither). Leave "callback_risks" as an empty list if nothing qualifies. Level mismatch from title or salary band is the one risk that may have no quote; use the title or band text as the quote.`;
 
   try {
-    const raw = await callClaude(prompt, 4000);
+    const raw = await callClaude(prompt, 4000, 'Screen');
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const r = JSON.parse(clean);
     screenResult = r;
@@ -1715,7 +1762,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
 }`;
 
   try {
-    const raw = await callClaude(prompt, 8000);
+    const raw = await callClaude(prompt, 8000, 'Tailor');
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const r = JSON.parse(clean);
     renderTailor(r);
@@ -1769,7 +1816,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
 }
 Every line with "ok": false must have a matching entry in "issues". Return an empty "issues" list only if every line is ok.`;
   try {
-    const raw = await callClaude(prompt, 6000);
+    const raw = await callClaude(prompt, 6000, 'Accuracy check');
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const a = JSON.parse(clean);
     if (box()) box().innerHTML = renderAudit(a);
@@ -2497,7 +2544,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
     const prompt = def.buildPrompt(t);
 
     try {
-      const raw = await callClaude(prompt, 2000);
+      const raw = await callClaude(prompt, 2000, 'Insights');
       const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
       const result = JSON.parse(clean);
       lastInsights = { label: t.label, category: t.category, generatedAt: new Date().toISOString(), ...result };
