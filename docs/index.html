@@ -1449,7 +1449,7 @@ verdict: apply = score 7+, review = score 5-6, pass = score 4 or below
 callback_risks rules: include only criteria the posting actually states. Copy the requirement's wording verbatim into "quote" — if a requirement lists alternatives ("sales, marketing, or product management experience"), quote the whole list and judge it against all of them, not just the first. Set "section" from where the wording sits in the posting (a required-qualifications list, a preferred/nice-to-have list, or neither). Leave "callback_risks" as an empty list if nothing qualifies. Level mismatch from title or salary band is the one risk that may have no quote; use the title or band text as the quote.`;
 
   try {
-    const raw = await callClaude(prompt, 1500);
+    const raw = await callClaude(prompt, 4000);
     const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
     const r = JSON.parse(clean);
     screenResult = r;
@@ -2497,7 +2497,7 @@ Respond with ONLY a valid JSON object, no markdown fences:
     const prompt = def.buildPrompt(t);
 
     try {
-      const raw = await callClaude(prompt, 700);
+      const raw = await callClaude(prompt, 2000);
       const clean = raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
       const result = JSON.parse(clean);
       lastInsights = { label: t.label, category: t.category, generatedAt: new Date().toISOString(), ...result };
